@@ -3,14 +3,14 @@
 # need to have RISCVTESTS enviroment variable
 # set the name of the config you want to use for simulation
 # 	you must compile the simulator by yourself first
-ROCKET_CHIP ?= $ROCKETCHIP
-SIMCONFIG ?= DefaultConfig					
+ROCKET_CHIP ?= ${ROCKETCHIP}
+SIMCONFIG ?= DefaultConfig-debug	
 
 # enable process substitution
 SHELL=/bin/bash
 
 CC = riscv64-unknown-elf-gcc
-INC_RD = $RISCVTESTS
+INC_RD = ${RISCVTESTS}
 INCS = -I $(INC_RD)/env -I $(INC_RD)/benchmarks/common -I .
 OSRCS = $(INC_RD)/benchmarks/common/syscalls.c $(INC_RD)/benchmarks/common/crt.S		# other src files that need to compile with program srcs
 CFLAGS = -mcmodel=medany -std=gnu99 -fno-common -fno-builtin-printf

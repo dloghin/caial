@@ -10,16 +10,16 @@ class CycleInfo(object):
         self.regid = int(log[1])
         self.cycle = int(log[3:15])
         self.valid = int(log[16]) == 1
-        self.pc    = int(log[23:33], 16)
-        self.wreg  = int(log[38:40])
-        self.wval  = int(log[41:57], 16)
-        self.wvalid= int(log[59]) == 1
-        self.sreg1 = int(log[65:67])
-        self.src1  = int(log[68:84], 16)
-        self.sreg2 = int(log[89:91])
-        self.src2  = int(log[92:108], 16)
-        self.binary= int(log[116:124], 16)
-        self._disam = log[126:]
+        self.pc    = int(log[23:39], 16)
+        self.wreg  = int(log[44:46])
+        self.wval  = int(log[47:63], 16)
+        self.wvalid= int(log[65]) == 1
+        self.sreg1 = int(log[71:73])
+        self.src1  = int(log[74:90], 16)
+        self.sreg2 = int(log[95:97])
+        self.src2  = int(log[98:114], 16)
+        self.binary= int(log[122:130], 16)
+        self._disam = log[132:]
         self.instr = self._disam.split()[0]
         self.ops = map(lambda x : x.rstrip(','), self._disam.split()[1:])
 
@@ -53,11 +53,6 @@ if __name__ == '__main__':
             pc = cycleinfo.pc
             binary = cycleinfo.binary
 
-            # if its not the user-level program, but the debug-mode codes
-            # or if its c.j pc+0 (infinite loop, waiting for termination)
-            # TODO: take path to objdump file as input and extract the set of pc for filter
-            if (pc < 0x80000000 or binary == 0x0000a001):
-                continue
 
             # initialize corresponding entry in two dict
             if (not instr in instr_cycles_dict):
