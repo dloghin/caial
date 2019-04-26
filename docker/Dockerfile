@@ -25,8 +25,12 @@ RUN apt-get install -y \
 	default-jdk \
 	make \
 	g++ \
-	python-pip
-RUN apt-get install -y apt-transport-https ca-certificates
+	python \
+	python-pip \
+	vim \
+	wget \
+	apt-transport-https \
+	ca-certificates
 RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list \
 	&& apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823 \
 	&& apt-get update \
@@ -48,10 +52,14 @@ RUN cd riscv \
 	&& git clone --recursive  https://github.com/freechipsproject/rocket-tools \
 	&& cd rocket-tools \ 
 	&& ./build.sh
-ENV PATH $PATH:$RISCV/bin
-ENV ROSCKETCHIP /riscv/rocket-chip
+ENV PATH ${PATH}:${RISCV}/bin
+ENV ROCKETCHIP /riscv/rocket-chip
 RUN cd riscv \
 	&& git clone --recursive  https://github.com/ucb-bar/rocket-chip.git
+RUN cd riscv \
+	&& cd rocket-chip \
+	&& cd emulator \
+	&& make debug || true
 RUN cd riscv \
 	&& cd rocket-chip \
 	&& cd emulator \
@@ -65,6 +73,5 @@ RUN cd riscv \
 	&& make install
 ENV RISCVTESTS /riscv/riscv-tests
 RUN git clone https://github.com/sdcioc/caial.git \
-	&& apt-get -y install python-pip \
 	&& pip install numpy
 
