@@ -179,6 +179,11 @@ cd docker
 docker build .
 ```
 
+### Run docker with local git repo as a volume
+```
+docker run -it -v `pwd`:/caial-dev caial bash
+```
+
 ### Download docker image
 ```
 docker pull sdcioc/bprofriscv:latest
