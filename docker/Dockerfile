@@ -1,4 +1,5 @@
 FROM ubuntu:16.04
+RUN chown root:root /tmp && chmod 1777 /tmp
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y \
 	git \
