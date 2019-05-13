@@ -1,8 +1,7 @@
 //KNN
 // https://www.geeksforgeeks.org/k-nearest-neighbours/
 
-#include <stdlib.h>
-#include "util.h"
+#include "../common/common.h"
 
 #define TRAINING_DATA_LENGTH 150
 #define INPUT_LENGTH 4
@@ -314,7 +313,6 @@ int training_data_Y [TRAINING_DATA_LENGTH] = {
 2
 }
 
-
 T_DATA euclidian_distance (T_DATA X[INPUT_LENGTH], T_DATA Y[INPUT_LENGTH]) {
     int index;
     T_DATA sum 0.0;
@@ -373,12 +371,18 @@ int classifyAPoint(T_DATA training_data_X[][INPUT_LENGTH], int training_data_Y[]
 
 int main() 
 { 
+
+
 	T_DATA test_data[INPUT_LENGTH] = {5.4,3.7,1.5,0.2};
-	int n = TRAINING_DATA_LENGTH; // Number of data points 
-	int k = K_VALUE; 
+	size_t n = TRAINING_DATA_LENGTH; // Number of data points 
+	size_t k = K_VALUE; 
 
 	// Parameter to decide groupr of the testing point 
-	int a = classifyAPoint(training_data_X, training_data_Y, n, k, test_data); 
+	size_t a = classifyAPoint(training_data_X, training_data_Y, n, k, test_data); 
+
+  #ifdef DEBUG
+    printf("Result: %d\n", a);
+  #endif
 	return 0; 
 } 
 
