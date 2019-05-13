@@ -4,149 +4,381 @@
 #include <stdlib.h>
 #include "util.h"
 
-#define TRAINING_DATA_LENGTH 17
+#define TRAINING_DATA_LENGTH 150
+#define INPUT_LENGTH 4
+#define K_VALUE 7
 
-/* Classify a point by having as
-Training data points with
-x - x value
-y - y value
-val - valut of th epoint
+T_DATA training_data_X [TRAINING_DATA_LENGTH][INPUT_LENGTH] = {
+{5.1,3.5,1.4,0.2},
+{4.9,3.0,1.4,0.2},
+{4.7,3.2,1.3,0.2},
+{4.6,3.1,1.5,0.2},
+{5.0,3.6,1.4,0.2},
+{5.4,3.9,1.7,0.4},
+{4.6,3.4,1.4,0.3},
+{5.0,3.4,1.5,0.2},
+{4.4,2.9,1.4,0.2},
+{4.9,3.1,1.5,0.1},
+{5.4,3.7,1.5,0.2},
+{4.8,3.4,1.6,0.2},
+{4.8,3.0,1.4,0.1},
+{4.3,3.0,1.1,0.1},
+{5.8,4.0,1.2,0.2},
+{5.7,4.4,1.5,0.4},
+{5.4,3.9,1.3,0.4},
+{5.1,3.5,1.4,0.3},
+{5.7,3.8,1.7,0.3},
+{5.1,3.8,1.5,0.3},
+{5.4,3.4,1.7,0.2},
+{5.1,3.7,1.5,0.4},
+{4.6,3.6,1.0,0.2},
+{5.1,3.3,1.7,0.5},
+{4.8,3.4,1.9,0.2},
+{5.0,3.0,1.6,0.2},
+{5.0,3.4,1.6,0.4},
+{5.2,3.5,1.5,0.2},
+{5.2,3.4,1.4,0.2},
+{4.7,3.2,1.6,0.2},
+{4.8,3.1,1.6,0.2},
+{5.4,3.4,1.5,0.4},
+{5.2,4.1,1.5,0.1},
+{5.5,4.2,1.4,0.2},
+{4.9,3.1,1.5,0.1},
+{5.0,3.2,1.2,0.2},
+{5.5,3.5,1.3,0.2},
+{4.9,3.1,1.5,0.1},
+{4.4,3.0,1.3,0.2},
+{5.1,3.4,1.5,0.2},
+{5.0,3.5,1.3,0.3},
+{4.5,2.3,1.3,0.3},
+{4.4,3.2,1.3,0.2},
+{5.0,3.5,1.6,0.6},
+{5.1,3.8,1.9,0.4},
+{4.8,3.0,1.4,0.3},
+{5.1,3.8,1.6,0.2},
+{4.6,3.2,1.4,0.2},
+{5.3,3.7,1.5,0.2},
+{5.0,3.3,1.4,0.2},
+{7.0,3.2,4.7,1.4},
+{6.4,3.2,4.5,1.5},
+{6.9,3.1,4.9,1.5},
+{5.5,2.3,4.0,1.3},
+{6.5,2.8,4.6,1.5},
+{5.7,2.8,4.5,1.3},
+{6.3,3.3,4.7,1.6},
+{4.9,2.4,3.3,1.0},
+{6.6,2.9,4.6,1.3},
+{5.2,2.7,3.9,1.4},
+{5.0,2.0,3.5,1.0},
+{5.9,3.0,4.2,1.5},
+{6.0,2.2,4.0,1.0},
+{6.1,2.9,4.7,1.4},
+{5.6,2.9,3.6,1.3},
+{6.7,3.1,4.4,1.4},
+{5.6,3.0,4.5,1.5},
+{5.8,2.7,4.1,1.0},
+{6.2,2.2,4.5,1.5},
+{5.6,2.5,3.9,1.1},
+{5.9,3.2,4.8,1.8},
+{6.1,2.8,4.0,1.3},
+{6.3,2.5,4.9,1.5},
+{6.1,2.8,4.7,1.2},
+{6.4,2.9,4.3,1.3},
+{6.6,3.0,4.4,1.4},
+{6.8,2.8,4.8,1.4},
+{6.7,3.0,5.0,1.7},
+{6.0,2.9,4.5,1.5},
+{5.7,2.6,3.5,1.0},
+{5.5,2.4,3.8,1.1},
+{5.5,2.4,3.7,1.0},
+{5.8,2.7,3.9,1.2},
+{6.0,2.7,5.1,1.6},
+{5.4,3.0,4.5,1.5},
+{6.0,3.4,4.5,1.6},
+{6.7,3.1,4.7,1.5},
+{6.3,2.3,4.4,1.3},
+{5.6,3.0,4.1,1.3},
+{5.5,2.5,4.0,1.3},
+{5.5,2.6,4.4,1.2},
+{6.1,3.0,4.6,1.4},
+{5.8,2.6,4.0,1.2},
+{5.0,2.3,3.3,1.0},
+{5.6,2.7,4.2,1.3},
+{5.7,3.0,4.2,1.2},
+{5.7,2.9,4.2,1.3},
+{6.2,2.9,4.3,1.3},
+{5.1,2.5,3.0,1.1},
+{5.7,2.8,4.1,1.3},
+{6.3,3.3,6.0,2.5},
+{5.8,2.7,5.1,1.9},
+{7.1,3.0,5.9,2.1},
+{6.3,2.9,5.6,1.8},
+{6.5,3.0,5.8,2.2},
+{7.6,3.0,6.6,2.1},
+{4.9,2.5,4.5,1.7},
+{7.3,2.9,6.3,1.8},
+{6.7,2.5,5.8,1.8},
+{7.2,3.6,6.1,2.5},
+{6.5,3.2,5.1,2.0},
+{6.4,2.7,5.3,1.9},
+{6.8,3.0,5.5,2.1},
+{5.7,2.5,5.0,2.0},
+{5.8,2.8,5.1,2.4},
+{6.4,3.2,5.3,2.3},
+{6.5,3.0,5.5,1.8},
+{7.7,3.8,6.7,2.2},
+{7.7,2.6,6.9,2.3},
+{6.0,2.2,5.0,1.5},
+{6.9,3.2,5.7,2.3},
+{5.6,2.8,4.9,2.0},
+{7.7,2.8,6.7,2.0},
+{6.3,2.7,4.9,1.8},
+{6.7,3.3,5.7,2.1},
+{7.2,3.2,6.0,1.8},
+{6.2,2.8,4.8,1.8},
+{6.1,3.0,4.9,1.8},
+{6.4,2.8,5.6,2.1},
+{7.2,3.0,5.8,1.6},
+{7.4,2.8,6.1,1.9},
+{7.9,3.8,6.4,2.0},
+{6.4,2.8,5.6,2.2},
+{6.3,2.8,5.1,1.5},
+{6.1,2.6,5.6,1.4},
+{7.7,3.0,6.1,2.3},
+{6.3,3.4,5.6,2.4},
+{6.4,3.1,5.5,1.8},
+{6.0,3.0,4.8,1.8},
+{6.9,3.1,5.4,2.1},
+{6.7,3.1,5.6,2.4},
+{6.9,3.1,5.1,2.3},
+{5.8,2.7,5.1,1.9},
+{6.8,3.2,5.9,2.3},
+{6.7,3.3,5.7,2.5},
+{6.7,3.0,5.2,2.3},
+{6.3,2.5,5.0,1.9},
+{6.5,3.0,5.2,2.0},
+{6.2,3.4,5.4,2.3},
+{5.9,3.0,5.1,1.8}
+}
 
-distance - array with distances from the point to classify to the training data points
-n -number of training points
-k - the number of nearest neighbors
+int training_data_Y [TRAINING_DATA_LENGTH] = {
+{0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+0,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+1,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2,
+2
+}
 
-Point to classify data:
-px - x value
-py - y value
 
-return the value of the point to classify
-*/
-int classifyAPoint(int x[], int y[],int  val[], int distance[], int n, int k, int px, int py) 
-{ 
-	int i, j;
-	int min;
-	int aux;
-	int poz;
-	//calcualte the distance from the point to training data points
-	for (i = 0; i < n; i++) 
-		distance[i] = 
-			(x[i] - px) * (x[i] - px) + 
-				(y[i] - py) * (y[i] - py); 
+T_DATA euclidian_distance (T_DATA X[INPUT_LENGTH], T_DATA Y[INPUT_LENGTH]) {
+    int index;
+    T_DATA sum 0.0;
+    for(index = 0; index < INPUT_LENGTH; index++) {
+        sum = sum + (X[index]-Y[index])*(X[index]-Y[index]);
+    }
+    return sum;
+}
 
-
-	//find the closest k training points to our point
-	for (i = 0; i < k; i++) {
-		min = distance[i];
-		poz = i;
-		for( j = i + 1; j < n; j++) {
-			if (min > distance[j]) {
-				min = distance[j];
-				poz = j;
+int classifyAPoint(T_DATA training_data_X[][INPUT_LENGTH], int training_data_Y[], int n, int k, T_DATA test_data_X[INPUT_LENGTH]) 
+{
+	int index;
+	int jindex;
+	int kindex;
+	T_DATA distances[K_VALUE];
+	T_DATA distance;
+	int values[K_VALUE];
+	//initialise distance
+	for(kindex = 0; kindex < k; kindex++) {
+		distances[kindex] = 999999;
+		values[kindex] = -1;
+	}
+	//calcualte the smallest k-distance from the point to training data points
+	for (index = 0; index < n; index++) {
+		distance = euclidian_distance(training_data_X[index], test_data_X);
+		for(kindex = 0; kindex < k; kindex++) {
+			if(distance < distances[kindex]) {
+				for(jindex = k - 1; jindex > kindex; jidnex--) {
+					distances[jidnex] = distances[jidnex-1];
+					values[jidnex] = values[jidnex-1];
+				}
+				distances[kindex] = distance;
+				values[kindex] = training_data_Y[index];
+				break;
 			}
 		}
-		aux = distance[i];
-		distance[i] = distance[poz];
-		distance[poz] = aux;
-		aux = val[i];
-		val[i] = val[poz];
-		val[poz] = aux;
 	}
 
-	// Find the most common value in out k neighbors
-	int freq1 = 0; 
-	int freq2 = 0;
-	for (i = 0; i < k; i++) 
-	{ 
-		if (val[i] == 0) 
-			freq1++; 
-		else if (val[i] == 1) 
-			freq2++; 
-	} 
-
-	return (freq1 > freq2 ? 0 : 1); 
+	int max_frequency = 1;
+	int max_value = values[0];
+	int current_frequency;
+	for(kindex = 0; kindex < k; kindex++) {
+		current_frequency = 1;
+		for(jidnex = kindex + 1; jindex < k; jidnex++) {
+			if(values[kindex] == values[jidnex]) {
+				current_frequency = current_frequency + 1;
+				if(current_frequency > max_frequency) {
+					max_value = values[kindex];
+				}
+			}
+		}
+	}
+	
+	return max_value; 
 } 
 
 int main() 
 { 
+	T_DATA test_data[INPUT_LENGTH] = {5.4,3.7,1.5,0.2};
 	int n = TRAINING_DATA_LENGTH; // Number of data points 
-	int x[TRAINING_DATA_LENGTH];
-	int y[TRAINING_DATA_LENGTH];
-	int val[TRAINING_DATA_LENGTH];
-	int distance[TRAINING_DATA_LENGTH];
-
-	//training data TODO: finde something more elegant
-	x[0] = 1; 
-	y[0] = 12; 
-	val[0] = 0; 
-
-	x[1] = 2; 
-	y[1] = 5; 
-	val[1] = 0; 
-
-	x[2] = 5; 
-	y[2] = 3; 
-	val[2] = 1; 
-
-	x[3] = 3; 
-	y[3] = 2; 
-	val[3] = 1; 
-
-	x[4] = 3; 
-	y[4] = 6; 
-	val[4] = 0; 
-
-	x[5] = 1.5; 
-	y[5] = 9; 
-	val[5] = 1; 
-
-	x[6] = 7; 
-	y[6] = 2; 
-	val[6] = 1; 
-
-	x[7] = 6; 
-	y[7] = 1; 
-	val[7] = 1; 
-
-	x[8] = 3.8; 
-	y[8] = 3; 
-	val[8] = 1; 
-
-	x[9] = 3; 
-	y[9] = 10; 
-	val[9] = 0; 
-
-	x[10] = 5.6; 
-	y[10] = 4; 
-	val[10] = 1; 
-
-	x[11] = 4; 
-	y[11] = 2; 
-	val[11] = 1; 
-
-	x[12] = 3.5; 
-	y[12] = 8; 
-	val[12] = 0; 
-
-	x[13] = 2; 
-	y[13] = 11; 
-	val[13] = 0; 
-
-	x[14] = 2; 
-	y[14] = 5; 
-	val[14] = 1; 
-
-	x[15] = 2; 
-	y[15] = 9; 
-	val[15] = 0; 
-
-	x[16] = 1; 
-	y[16] = 7; 
-	val[16] = 0; 
+	int k = K_VALUE; 
 
 	// Parameter to decide groupr of the testing point 
-	int k = 3; 
-	int a = classifyAPoint(x, y, val, distance, n, k, 2.5, 7); 
+	int a = classifyAPoint(training_data_X, training_data_Y, n, k, test_data); 
 	return 0; 
 } 
 
