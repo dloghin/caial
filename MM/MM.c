@@ -1,41 +1,62 @@
+/*
+* Matrix multiplication
+*
+*/
+#include <stdlib.h>
+#include "util.h"
 #include "../common/common.h"
 
-element_t A[DIM*DIM], B[DIM*DIM], C[DIM*DIM];
 
-void gen_matrix(element_t* A, size_t n, size_t m) {
-	size_t i, j, k = 0;
-	for (i = 0; i < n; i++)
-		for (j = 0; j < m; j++) {
+#define T_DATA float
+#define DATA_LENGTH 10
+
+T_DATA A[DATA_LENGTH][DATA_LENGTH], B[DATA_LENGTH][DATA_LENGTH], C[DATA_LENGTH][DATA_LENGTH];
+
+/**
+* Initialize matrix A with size of n rows and m columns
+*
+*/
+void gen_matrix(T_DATA A[][], size_t n, size_t m) {
+	size_t index, jindex, kindex = 0;
+	for (index = 0; index < n; index++)
+		for (jindex = 0; jindex < m; jindex++) {
 #ifdef WITHINT
-			A[i * DIM + j] = k++;
+			A[index][jidnex] = kindex++;
 #else
-			A[i * DIM + j] = k++/3.14;
+			A[index][jindex] = kindex++/3.14;
 #endif
 		}
 }
 
 #ifdef DEBUG
-void print_matrix(element_t* A, size_t n, size_t m) {
-	size_t i, j;
-	for (i = 0; i < n; i++) {
-		for (j = 0; j < m; j++)
-			printf("%ld ", A[i * DIM + j]);
+/**
+* Print elements of matrix A with size of n rows and m columns
+*
+*/
+void print_matrix(T_DATA A[][], size_t n, size_t m) {
+	size_t index, jindex;
+	for (index = 0; index < n; index++)
+		for (jindex = 0; jindex < m; jindex++) {
+			printf("%ld ", A[index][jindex]);
 		printf("\n");
 	}
 	printf("\n");
 }
 #endif
 
-void mm(element_t* A, element_t* B, element_t* C, size_t n, size_t m, size_t p) {
-	size_t i, j, k, aidx, bidx, cidx;
-	for (i = 0; i < n; i++)
-		for (j = 0; j < p; j++) {
-			cidx = i * DIM + j;
-			C[cidx] = 0;
-			for (k = 0; k < m; k++) {
-				aidx = i * DIM + k;
-				bidx = k * DIM + j;
-				C[cidx] += A[aidx] * B[bidx];
+
+/**
+* Multiply matrix A (n rows and m columns) 
+* with B (m rows and p columns) and put the result
+* in matrix C (n rows and p columns)
+*/
+void matrix_multiplication(T_DATA A[][], T_DATA B[][], T_DATA C[][], size_t n, size_t m, size_t p) {
+	size_t index, jindex, kindex;
+	for (index = 0; index < n; index++)
+		for (jindex = 0; jindex < p; jindex++) {
+			C[index][jindex] = 0;
+			for (kindex = 0; kindex < m; kindex++) {
+				C[index][jindex] = C[index][jindex] + A[index][kindex] * B[kindex][jindex];
 			}
 		}
 }
