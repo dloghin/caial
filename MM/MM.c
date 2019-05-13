@@ -1,26 +1,22 @@
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-
-#include <stdint.h>
-
-#define element_t int64_t
-
-#define DIM 64
+#include "../common/common.h"
 
 element_t A[DIM*DIM], B[DIM*DIM], C[DIM*DIM];
 
-void gen_matrix(element_t* A, int n, int m) {
-	int i, j, k = 0;
+void gen_matrix(element_t* A, size_t n, size_t m) {
+	size_t i, j, k = 0;
 	for (i = 0; i < n; i++)
 		for (j = 0; j < m; j++) {
+#ifdef WITHINT
 			A[i * DIM + j] = k++;
+#else
+			A[i * DIM + j] = k++/3.14;
+#endif
 		}
 }
 
 #ifdef DEBUG
-void print_matrix(element_t* A, int n, int m) {
-	int i, j;
+void print_matrix(element_t* A, size_t n, size_t m) {
+	size_t i, j;
 	for (i = 0; i < n; i++) {
 		for (j = 0; j < m; j++)
 			printf("%ld ", A[i * DIM + j]);
@@ -30,8 +26,8 @@ void print_matrix(element_t* A, int n, int m) {
 }
 #endif
 
-void mm(element_t* A, element_t* B, element_t* C, int n, int m, int p) {
-	int i, j, k, aidx, bidx, cidx;
+void mm(element_t* A, element_t* B, element_t* C, size_t n, size_t m, size_t p) {
+	size_t i, j, k, aidx, bidx, cidx;
 	for (i = 0; i < n; i++)
 		for (j = 0; j < p; j++) {
 			cidx = i * DIM + j;
@@ -45,9 +41,9 @@ void mm(element_t* A, element_t* B, element_t* C, int n, int m, int p) {
 }
 
 int main() {
-	int n = 4;
-	int m = 4;
-	int p = 4;
+	size_t n = 4;
+	size_t m = 4;
+	size_t p = 4;
 	gen_matrix(A, n, m);
 	gen_matrix(B, m, p);
 	mm(A, B, C, n, m, p);

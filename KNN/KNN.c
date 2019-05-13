@@ -1,8 +1,7 @@
 //KNN
 // https://www.geeksforgeeks.org/k-nearest-neighbours/
 
-#include <stdlib.h>
-#include "util.h"
+#include "../common/common.h"
 
 #define TRAINING_DATA_LENGTH 17
 
@@ -22,12 +21,13 @@ py - y value
 
 return the value of the point to classify
 */
-int classifyAPoint(int x[], int y[],int  val[], int distance[], int n, int k, int px, int py) 
+int classifyAPoint(element_t x[], element_t y[], element_t val[], element_t distance[], size_t n, size_t k, element_t px, element_t py)
 { 
-	int i, j;
-	int min;
-	int aux;
-	int poz;
+	size_t i, j;
+	size_t min;
+	size_t aux;
+	size_t poz;
+
 	//calcualte the distance from the point to training data points
 	for (i = 0; i < n; i++) 
 		distance[i] = 
@@ -69,13 +69,13 @@ int classifyAPoint(int x[], int y[],int  val[], int distance[], int n, int k, in
 
 int main() 
 { 
-	int n = TRAINING_DATA_LENGTH; // Number of data points 
-	int x[TRAINING_DATA_LENGTH];
-	int y[TRAINING_DATA_LENGTH];
-	int val[TRAINING_DATA_LENGTH];
-	int distance[TRAINING_DATA_LENGTH];
+	size_t n = TRAINING_DATA_LENGTH; // Number of data points
+	element_t x[TRAINING_DATA_LENGTH];
+	element_t y[TRAINING_DATA_LENGTH];
+	element_t val[TRAINING_DATA_LENGTH];
+	element_t distance[TRAINING_DATA_LENGTH];
 
-	//training data TODO: finde something more elegant
+	//training data TODO: find something more elegant
 	x[0] = 1; 
 	y[0] = 12; 
 	val[0] = 0; 
@@ -144,9 +144,14 @@ int main()
 	y[16] = 7; 
 	val[16] = 0; 
 
-	// Parameter to decide groupr of the testing point 
-	int k = 3; 
-	int a = classifyAPoint(x, y, val, distance, n, k, 2.5, 7); 
+	// Parameter to decide group of the testing point
+	size_t k = 3;
+	int a = classifyAPoint(x, y, val, distance, n, k, 2.5, 7);
+
+#ifdef DEBUG
+	printf("Result: %d\n", a);
+#endif
+
 	return 0; 
 } 
 
