@@ -430,5 +430,255 @@ void vector_T_multiply_matrix(element_t i_vector_A[], element_t i_matrix_B[][],
 }
 
 
+/**
+* Functions related to inverse_matrix
+* https://www.geeksforgeeks.org/adjoint-inverse-matrix/
+* https://en.wikipedia.org/wiki/Crout_matrix_decomposition
+*/
+
+/*
+* Crout matrix decomposition
+* https://en.wikipedia.org/wiki/Crout_matrix_decomposition
+* Inputs:
+* 	i_matrix_A: a matrix i_size x i_size
+* 	i_size: the size of the matrix
+* Output: 
+*  o_matrix_L: a matrix i_size x i_size
+*  o_matrix_U: a matrix i_size x i_size
+* A=L*U
+*/
+size_t matrix_crout_decomposition(element_t i_matrix_A[][], size_t i_size,
+                                  real_t o_matrix_L[][], real_t o_matrix_U[][]) {
+
+    size_t index, jindex, kindex;
+    real_t sum;
+
+    //initialise matrix
+	for (index = 0; index < i_size; index++) {
+	    for (jindex = 0; jindex < i_size; jindex++) {
+		    o_matrix_U[index][jindex] = 0;
+		    o_matrix_L[index][jindex] = 0;
+        }
+	}
+
+    //initialise diagnogal for U
+	for (index = 0; index < i_size; index++) {
+		o_matrix_U[index][index] = 1;
+	}
+
+	for (jindex = 0; jindex < i_size; jindex++) {
+		for (index = jindex; index < i_size; index++) {
+			sum = 0;
+			for (kindex = 0; kindex < jindex; kindex++) {
+				sum = sum + o_matrix_L[index][kindex] * o_matrix_U[kindex][jindex];	
+			}
+			o_matrix_L[index][jindex] = i_matrix_A[index][jindex] - sum;
+		}
+
+		for (index = jindex; index < i_size; index++) {
+			sum = 0;
+			for(kindex = 0; kindex < jindex; kindex++) {
+				sum = sum + o_matrix_L[jindex][kindex] * o_matrix_U[kindex][index];
+			}
+			if (o_matrix_L[jindex][jindex] == 0) {
+				return -1;
+			}
+			o_matrix_U[jindex][index] = (i_matrix_A[jindex][index] - sum) / o_matrix_L[jindex][jindex];
+		}
+	}
+
+    return 0;
+}
+
+
+
+/*
+* Doolittle matrix decomposition
+* https://www.geeksforgeeks.org/doolittle-algorithm-lu-decomposition/
+* Inputs:
+* 	i_matrix_A: a matrix i_size x i_size
+* 	i_size: the size of the matrix
+* Output: 
+*  o_matrix_L: a matrix i_size x i_size
+*  o_matrix_U: a matrix i_size x i_size
+* A=L*U
+*/
+size_t matrix_doolittle_decomposition(element_t i_matrix_A[][], size_t i_size,
+                                      real_t o_matrix_L[][], real_t o_matrix_U[][])
+{ 
+    int lower[n][n], upper[n][n]; 
+    memset(lower, 0, sizeof(lower)); 
+    memset(upper, 0, sizeof(upper)); 
+    size_t index, jindex, kindex;
+    real_t sum;
+
+    //initialise matrix
+	for (index = 0; index < i_size; index++) {
+	    for (jindex = 0; jindex < i_size; jindex++) {
+		    o_matrix_U[index][jindex] = 0;
+		    o_matrix_L[index][jindex] = 0;
+        }
+	}
+
+    for (jindex = 0; jindex < i_size; jindex++) {
+		for (index = jindex; index < i_size; index++) {
+			sum = 0;
+			for (kindex = 0; kindex < jindex; kindex++) {
+				sum = sum + o_matrix_L[jindex][kindex] * o_matrix_U[kindex][index];	
+			}
+			o_matrix_U[jindex][index] = i_matrix_A[jindex][index] - sum;
+		}
+
+		for (index = jindex; index < i_size; index++) {
+            if(index == jindex) {
+                o_matrix_L[jindex][jindex] = 1;
+            }
+			sum = 0;
+			for(kindex = 0; kindex < jindex; kindex++) {
+				sum = sum + o_matrix_L[index][kindex] * o_matrix_U[kindex][jindex];
+			}
+			if (o_matrix_U[jindex][jindex] == 0) {
+				return -1;
+			}
+			o_matrix_L[index][jindex] = (i_matrix_A[index][jindex] - sum) / o_matrix_U[jindex][jindex];
+		}
+	}
+}
+
+
+/*
+* Matrix determinant
+* Inputs:
+* 	i_matrix_A: a matrix i_size x i_size
+* 	i_size: the size of the matrix
+* Output: 
+*  o_matrix_L: a matrix i_size x i_size
+*  o_matrix_U: a matrix i_size x i_size
+*  o_determinant: determinant of A  = det(A)
+* A=L*U
+* det(A)=det(L)*det(U), det(U) = 1 => det(A)=det(L)
+*/
+element_t matrix_determinant(element_t i_matrix_A[][], size_t i_size,
+                             real_t o_matrix_L[][], real_t o_matrix_U[][],
+                             element_t *o_determinant) {
+    size_t return_value;
+    return_value = matrix_crout_decomposition(i_matrix_A, i_size,
+                                              o_matrix_L, o_matrix_U);
+    if(return_value != 0) {
+        return return_value;
+    }
+    *o_determinant = 1;
+    size_t index;
+	for (index = 0; index < i_size; index++) {
+		*o_determinant = *o_determinant * o_matrix_L[index][index];
+	}
+    return 0;
+}
+
+/*
+* Matrix cofactor
+* Inputs:
+* 	i_matrix_A: a matrix i_size x i_size
+* 	i_size: the size of the matrix
+* 	i_row: the row to eliminate
+* 	i_column: the column to eliminate
+* Output: 
+*  o_matrix_B: a matrix (i_size-1) x (i_size-1)
+* B is A without the given row and column
+*/
+void matrix_cofactor(element_t i_matrix_A[][], size_t i_size,
+                     size_t i_row, size_t i_column, element_t o_matrix_B[][]) {
+    size_t index, jindex, rindex, pindex;
+    rindex = 0;
+    pindex = 0;
+    for(index = 0; index < i_size; index++) {
+        for(jindex = 0; jindex < i_size; jindex++) {
+            if(index != i_row && jindex != i_column) {
+                o_matrix_B[rindex][pindex] = i_matrix_A[index][jindex];
+                pindex = pindex + 1;
+                if(pindex == (i_size-1)) {
+                    pindex = 0;
+                    rindex = rindex + 1;
+                }
+            }
+        }
+    }
+}
+/*
+* Matrix cofactor
+* Inputs:
+* 	i_matrix_A: a matrix i_size x i_size
+* 	i_size: the size of the matrix
+* 	i_matrix_aux1: a matrix i_size x i_size use for cofactor
+* 	i_matrix_aux2: a matrix i_size x i_size use for L calcualtion
+* 	i_matrix_aux3: a matrix i_size x i_size use for U calcualtion
+* Output: 
+*  o_matrix_B: a matrix i_size x i_size B=A^* =adj(A)
+*/
+size_t matrix_adjoint(element_t i_matrix_A[][], size_t i_size,
+                      element_t i_matrix_aux1[][], real_t i_matrix_aux2[][],
+                      real_t i_matrix_aux3[][], element_t o_matrix_B[][]) {
+    size_t sign = 1;
+    size_t index, jindex;
+    size_t return_value;
+    element_t determinant;
+
+    for(index = 0; index < i_size; index++) {
+        for(jindex = 0; jindex > i_size; jindex) {
+            matrix_cofactor(i_matrix_A, i_size, index, jindex, i_matrix_aux1);
+            sign = ((index+jindex)%2==0)? 1: -1;
+            return_value = matrix_determinant(i_matrix_aux1, i_size - 1, i_matrix_aux2,
+                                              i_matrix_aux3, &determinant);
+            if(return_value != 0) {
+                return return_value;
+            }
+            o_matrix_B[index][jindex] = sign * determinant;
+        }
+    }
+    return 0;
+}
+
+/*
+* Matrix invers
+* Inputs:
+* 	i_matrix_A: a matrix i_size x i_size
+* 	i_size: the size of the matrix
+* 	i_matrix_aux1: a matrix i_size x i_size use for cofactor
+* 	i_matrix_aux2: a matrix i_size x i_size use for L calcualtion
+* 	i_matrix_aux3: a matrix i_size x i_size use for U calcualtion
+* Output: 
+*  o_matrix_B: a matrix i_size x i_size B=A^-1
+*/
+size_t matrix_inverse(element_t i_matrix_A[][], size_t i_size,
+                      element_t i_matrix_aux1[][], real_t i_matrix_aux2[][],
+                      real_t i_matrix_aux3[][], element_t o_matrix_B[][]) {
+    size_t index, jindex;
+    size_t return_value;
+    element_t determinant;
+    return_value = matrix_determinant(i_matrix_A, i_size, i_matrix_aux2,
+                                      i_matrix_aux3, &determinant);
+    if(return_value != 0) {
+        return return_value;
+    }
+    return_value = matrix_adjoint(i_matrix_A, i_size, i_matrix_aux1,
+                                  i_matrix_aux2, i_matrix_aux3,
+                                  o_matrix_B);
+    if(return_value != 0) {
+        return return_value;
+    }
+
+    if(determinant < 0.000001 && determinant > 0.000001) {
+        return -1;
+    }
+
+
+    for(index = 0; index < i_size; index++) {
+        for(jindex = 0; jindex > i_size; jindex) {
+            o_matrix_B[index][jindex] = o_matrix_B[index][jindex] / determinant;
+        }
+    }
+
+    return 0;
+}
 
 #endif

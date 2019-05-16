@@ -92,24 +92,67 @@ void training_gd_LR(element_t training_data_X[][], element_t training_data_Y[]
     }
 }
 
+
+
+element_t g_inverse_matrix[INPUT_LENGTH+1][INPUT_LENGTH+1];
+element_t g_aux1[INPUT_LENGTH+1][INPUT_LENGTH+1];
+element_t g_aux2[INPUT_LENGTH+1];
+element_t g_aux3[INPUT_LENGTH+1][INPUT_LENGTH+1];
+element_t g_aux4[INPUT_LENGTH+1][INPUT_LENGTH+1];
+element_t g_aux5[INPUT_LENGTH+1][INPUT_LENGTH+1];
 /*
 * normal equation
 * theta = ((X.T*X)^-1) * X.T * y
-TODO: implement inverse_M
-void training_normal_LR(element_t training_data_X[][], element_t training_data_Y[]
+*/
+size_t training_normal_LR(element_t training_data_X[][], element_t training_data_Y[],
                     size_t training_data_length, size_t input_length,
-                    element_t theta[], element_t training_data_X_transpose[][],
+                    element_t theta[],
                     element_t inverse_matrix[][], element_t aux1[][],
-                    element_t aux2[]) {
-    dot_M_M(training_data_X_transpose, training_data_X, aux1,
-            input_length, training_data_length, input_length);
-    dot_M_V(training_data_X_transpose, input_length, training_data_length,
-            training_data_Y, aux2);
-    inverse_M(aux1, input_length, inverse_matrix);
-    dot_M_V(inverse_matrix, input_length, input_length, aux2, theta);
+                    element_t aux2[],  element_t aux3[][],  element_t aux4[][],
+                    element_t aux5[][]) {
+    size_t return_value;
+    /*
+    * training_data_X training_data_length x input_length
+    * aux1 input_length x input_length
+    * aux1 = X.T*X
+    */
+    matrix_T_multiply_matrix(training_data_X, training_data_X,
+                             input_length, training_data_length, input_length
+                             aux1);
+    /*
+    * training_data_X training_data_length x input_length
+    * training_data_Y training_data_length x 1
+    * aux2 input_length x 1
+    * aux2 = X.T*Y
+    */
+    matrix_T_multiply_vector(training_data_X, training_data_length, input_length,
+                             training_data_Y, aux2);
+    
+
+    /*
+    * aux1 input_length x input_length
+    * aux3 input_length x input_length
+    * aux4 input_length x input_length
+    * aux5 input_length x input_length
+    * inverse_matrix input_length x input_length
+    * inverse_matrix= aux^-1
+    */
+    return_value = matrix_inverse(aux1, input_length,
+                                  aux3, aux4, aux5, inverse_matrix);
+    if(return_value != 0) {
+        return return_value;
+    }
+
+    /*
+    * inverse_matrix input_length x input_length
+    * aux2 input_length x 1
+    * theta input_length x 1
+    * theta = inverse_matrix * aux2
+    */
+    matrix_multiply_vector(inverse_matrix, input_length, input_length,
+                           aux2, theta);
 
 }
-*/
 
 /*
 * y = theta.T*X
@@ -137,6 +180,18 @@ int main(void)
                    g_theta, MAX_ITERATIONS,
                    g_alpha, g_h_theta, g_error,
                    g_delta);
+    /* for normal ecuation
+    size_t return_value;
+    return_value = training_normal_LR(g_training_data_X_LR, g_training_data_Y,
+                                      TRAINING_DATA_LENGTH, INPUT_LENGTH+1,
+                                      g_theta,
+                                      g_inverse_matrix, g_aux1,
+                                      g_aux2, g_aux3, g_aux4,
+                                      g_aux5);
+    if(return_value != 0) {
+        return return_value;
+    }
+    */
     element_t answer = classify_LR(g_test_data_LR, g_theta,
                                    INPUT_LENGTH+1);
     #ifdef DEBUG
