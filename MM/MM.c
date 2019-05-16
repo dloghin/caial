@@ -6,20 +6,18 @@
 #include "util.h"
 #include "../common/common.h"
 
-
-#define T_DATA float
 #define DATA_LENGTH 10
 
-T_DATA A[DATA_LENGTH][DATA_LENGTH], B[DATA_LENGTH][DATA_LENGTH], C[DATA_LENGTH][DATA_LENGTH];
+element_t A[DATA_LENGTH][DATA_LENGTH], B[DATA_LENGTH][DATA_LENGTH], C[DATA_LENGTH][DATA_LENGTH];
 
 /**
-* Initialize matrix A with size of n rows and m columns
+* Initialize matrix A
 *
 */
-void gen_matrix(T_DATA A[][], size_t n, size_t m) {
+void gen_matrix(element_t A[][], size_t rows, size_t columns) {
 	size_t index, jindex, kindex = 0;
-	for (index = 0; index < n; index++)
-		for (jindex = 0; jindex < m; jindex++) {
+	for (index = 0; index < rows; index++)
+		for (jindex = 0; jindex < columns; jindex++) {
 #ifdef WITHINT
 			A[index][jidnex] = kindex++;
 #else
@@ -30,13 +28,13 @@ void gen_matrix(T_DATA A[][], size_t n, size_t m) {
 
 #ifdef DEBUG
 /**
-* Print elements of matrix A with size of n rows and m columns
+* Print elements of matrix A
 *
 */
-void print_matrix(T_DATA A[][], size_t n, size_t m) {
+void print_matrix(element_t A[][], size_t rows, size_t columns) {
 	size_t index, jindex;
-	for (index = 0; index < n; index++)
-		for (jindex = 0; jindex < m; jindex++) {
+	for (index = 0; index < rows; index++)
+		for (jindex = 0; jindex < columns; jindex++) {
 			printf("%ld ", A[index][jindex]);
 		printf("\n");
 	}
@@ -50,7 +48,7 @@ void print_matrix(T_DATA A[][], size_t n, size_t m) {
 * with B (m rows and p columns) and put the result
 * in matrix C (n rows and p columns)
 */
-void matrix_multiplication(T_DATA A[][], T_DATA B[][], T_DATA C[][], size_t n, size_t m, size_t p) {
+void matrix_multiplication(element_t A[][], element_t B[][], element_t C[][], size_t n, size_t m, size_t p) {
 	size_t index, jindex, kindex;
 	for (index = 0; index < n; index++)
 		for (jindex = 0; jindex < p; jindex++) {

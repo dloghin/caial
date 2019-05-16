@@ -1,349 +1,63 @@
 //KNN
 // https://www.geeksforgeeks.org/k-nearest-neighbours/
+// we use euclidian_distance_square instead of euclidian_distance
+// Ciocirlan Stefan-Dan 14.05.2019
 
+#include <stdlib.h>
+#include "util.h"
 #include "../common/common.h"
 
-#define TRAINING_DATA_LENGTH 150
-#define INPUT_LENGTH 4
 #define K_VALUE 7
-
-T_DATA training_data_X [TRAINING_DATA_LENGTH][INPUT_LENGTH] = {
-{5.1,3.5,1.4,0.2},
-{4.9,3.0,1.4,0.2},
-{4.7,3.2,1.3,0.2},
-{4.6,3.1,1.5,0.2},
-{5.0,3.6,1.4,0.2},
-{5.4,3.9,1.7,0.4},
-{4.6,3.4,1.4,0.3},
-{5.0,3.4,1.5,0.2},
-{4.4,2.9,1.4,0.2},
-{4.9,3.1,1.5,0.1},
-{5.4,3.7,1.5,0.2},
-{4.8,3.4,1.6,0.2},
-{4.8,3.0,1.4,0.1},
-{4.3,3.0,1.1,0.1},
-{5.8,4.0,1.2,0.2},
-{5.7,4.4,1.5,0.4},
-{5.4,3.9,1.3,0.4},
-{5.1,3.5,1.4,0.3},
-{5.7,3.8,1.7,0.3},
-{5.1,3.8,1.5,0.3},
-{5.4,3.4,1.7,0.2},
-{5.1,3.7,1.5,0.4},
-{4.6,3.6,1.0,0.2},
-{5.1,3.3,1.7,0.5},
-{4.8,3.4,1.9,0.2},
-{5.0,3.0,1.6,0.2},
-{5.0,3.4,1.6,0.4},
-{5.2,3.5,1.5,0.2},
-{5.2,3.4,1.4,0.2},
-{4.7,3.2,1.6,0.2},
-{4.8,3.1,1.6,0.2},
-{5.4,3.4,1.5,0.4},
-{5.2,4.1,1.5,0.1},
-{5.5,4.2,1.4,0.2},
-{4.9,3.1,1.5,0.1},
-{5.0,3.2,1.2,0.2},
-{5.5,3.5,1.3,0.2},
-{4.9,3.1,1.5,0.1},
-{4.4,3.0,1.3,0.2},
-{5.1,3.4,1.5,0.2},
-{5.0,3.5,1.3,0.3},
-{4.5,2.3,1.3,0.3},
-{4.4,3.2,1.3,0.2},
-{5.0,3.5,1.6,0.6},
-{5.1,3.8,1.9,0.4},
-{4.8,3.0,1.4,0.3},
-{5.1,3.8,1.6,0.2},
-{4.6,3.2,1.4,0.2},
-{5.3,3.7,1.5,0.2},
-{5.0,3.3,1.4,0.2},
-{7.0,3.2,4.7,1.4},
-{6.4,3.2,4.5,1.5},
-{6.9,3.1,4.9,1.5},
-{5.5,2.3,4.0,1.3},
-{6.5,2.8,4.6,1.5},
-{5.7,2.8,4.5,1.3},
-{6.3,3.3,4.7,1.6},
-{4.9,2.4,3.3,1.0},
-{6.6,2.9,4.6,1.3},
-{5.2,2.7,3.9,1.4},
-{5.0,2.0,3.5,1.0},
-{5.9,3.0,4.2,1.5},
-{6.0,2.2,4.0,1.0},
-{6.1,2.9,4.7,1.4},
-{5.6,2.9,3.6,1.3},
-{6.7,3.1,4.4,1.4},
-{5.6,3.0,4.5,1.5},
-{5.8,2.7,4.1,1.0},
-{6.2,2.2,4.5,1.5},
-{5.6,2.5,3.9,1.1},
-{5.9,3.2,4.8,1.8},
-{6.1,2.8,4.0,1.3},
-{6.3,2.5,4.9,1.5},
-{6.1,2.8,4.7,1.2},
-{6.4,2.9,4.3,1.3},
-{6.6,3.0,4.4,1.4},
-{6.8,2.8,4.8,1.4},
-{6.7,3.0,5.0,1.7},
-{6.0,2.9,4.5,1.5},
-{5.7,2.6,3.5,1.0},
-{5.5,2.4,3.8,1.1},
-{5.5,2.4,3.7,1.0},
-{5.8,2.7,3.9,1.2},
-{6.0,2.7,5.1,1.6},
-{5.4,3.0,4.5,1.5},
-{6.0,3.4,4.5,1.6},
-{6.7,3.1,4.7,1.5},
-{6.3,2.3,4.4,1.3},
-{5.6,3.0,4.1,1.3},
-{5.5,2.5,4.0,1.3},
-{5.5,2.6,4.4,1.2},
-{6.1,3.0,4.6,1.4},
-{5.8,2.6,4.0,1.2},
-{5.0,2.3,3.3,1.0},
-{5.6,2.7,4.2,1.3},
-{5.7,3.0,4.2,1.2},
-{5.7,2.9,4.2,1.3},
-{6.2,2.9,4.3,1.3},
-{5.1,2.5,3.0,1.1},
-{5.7,2.8,4.1,1.3},
-{6.3,3.3,6.0,2.5},
-{5.8,2.7,5.1,1.9},
-{7.1,3.0,5.9,2.1},
-{6.3,2.9,5.6,1.8},
-{6.5,3.0,5.8,2.2},
-{7.6,3.0,6.6,2.1},
-{4.9,2.5,4.5,1.7},
-{7.3,2.9,6.3,1.8},
-{6.7,2.5,5.8,1.8},
-{7.2,3.6,6.1,2.5},
-{6.5,3.2,5.1,2.0},
-{6.4,2.7,5.3,1.9},
-{6.8,3.0,5.5,2.1},
-{5.7,2.5,5.0,2.0},
-{5.8,2.8,5.1,2.4},
-{6.4,3.2,5.3,2.3},
-{6.5,3.0,5.5,1.8},
-{7.7,3.8,6.7,2.2},
-{7.7,2.6,6.9,2.3},
-{6.0,2.2,5.0,1.5},
-{6.9,3.2,5.7,2.3},
-{5.6,2.8,4.9,2.0},
-{7.7,2.8,6.7,2.0},
-{6.3,2.7,4.9,1.8},
-{6.7,3.3,5.7,2.1},
-{7.2,3.2,6.0,1.8},
-{6.2,2.8,4.8,1.8},
-{6.1,3.0,4.9,1.8},
-{6.4,2.8,5.6,2.1},
-{7.2,3.0,5.8,1.6},
-{7.4,2.8,6.1,1.9},
-{7.9,3.8,6.4,2.0},
-{6.4,2.8,5.6,2.2},
-{6.3,2.8,5.1,1.5},
-{6.1,2.6,5.6,1.4},
-{7.7,3.0,6.1,2.3},
-{6.3,3.4,5.6,2.4},
-{6.4,3.1,5.5,1.8},
-{6.0,3.0,4.8,1.8},
-{6.9,3.1,5.4,2.1},
-{6.7,3.1,5.6,2.4},
-{6.9,3.1,5.1,2.3},
-{5.8,2.7,5.1,1.9},
-{6.8,3.2,5.9,2.3},
-{6.7,3.3,5.7,2.5},
-{6.7,3.0,5.2,2.3},
-{6.3,2.5,5.0,1.9},
-{6.5,3.0,5.2,2.0},
-{6.2,3.4,5.4,2.3},
-{5.9,3.0,5.1,1.8}
-}
-
-int training_data_Y [TRAINING_DATA_LENGTH] = {
-{0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2
-}
-
-T_DATA euclidian_distance (T_DATA X[INPUT_LENGTH], T_DATA Y[INPUT_LENGTH]) {
-    int index;
-    T_DATA sum 0.0;
-    for(index = 0; index < INPUT_LENGTH; index++) {
+element_t g_distances[K_VALUE];
+element_t g_values[K_VALUE];
+/* Calculate the euclidian distance between vectors X and Y with a length given
+*/
+element_t euclidian_distance_square (element_t X[], element_t Y[], size_t length) {
+    size_t index;
+    element_t sum = 0;
+    for(index = 0; index < length; index++) {
         sum = sum + (X[index]-Y[index])*(X[index]-Y[index]);
     }
     return sum;
 }
 
-int classifyAPoint(T_DATA training_data_X[][INPUT_LENGTH], int training_data_Y[], int n, int k, T_DATA test_data_X[INPUT_LENGTH]) 
-{
-	int index;
-	int jindex;
-	int kindex;
-	T_DATA distances[K_VALUE];
-	T_DATA distance;
-	int values[K_VALUE];
-	//initialise distance
+/* Classify a given point test_data_X with a KNN network with training_data_length
+* points with position training_data_X and values training_data_Y with given k value
+* for the bumber of neighbors. It also calculate de distances to this neighbors with
+* their values
+*/
+element_t classifyAPoint(element_t training_data_X[][], element_t training_data_Y[],
+												 size_t training_data_length, size_t input_length,
+												 element_t test_data_X[], size_t k, element_t distances[],
+												 element_t values[]) {
+	size_t index, jidenx, kindex;
+	element_t distance;
+	size_t max_frequency;
+	size_t return_value;
+	size_t current_frequency;
+
+	//initialise distances and values
 	for(kindex = 0; kindex < k; kindex++) {
 		distances[kindex] = 999999;
 		values[kindex] = -1;
 	}
-	//calcualte the smallest k-distance from the point to training data points
-	for (index = 0; index < n; index++) {
-		distance = euclidian_distance(training_data_X[index], test_data_X);
+	/*
+	* Find the closest k points from training data points to our test data point
+	* distance is a sort vector of points distance with smallest distance on position 0
+	* values is the value of the points above
+	*/
+	for (index = 0; index < training_data_length; index++) {
+		//find the current distance
+		distance = euclidian_distance_square(training_data_X[index], test_data_X, input_length);
+		//find if its position in the distance vector
 		for(kindex = 0; kindex < k; kindex++) {
 			if(distance < distances[kindex]) {
+				//move all other points on position to the right
 				for(jindex = k - 1; jindex > kindex; jidnex--) {
 					distances[jidnex] = distances[jidnex-1];
 					values[jidnex] = values[jidnex-1];
 				}
+				//put the point on its position
 				distances[kindex] = distance;
 				values[kindex] = training_data_Y[index];
 				break;
@@ -351,37 +65,40 @@ int classifyAPoint(T_DATA training_data_X[][INPUT_LENGTH], int training_data_Y[]
 		}
 	}
 
-	int max_frequency = 1;
-	int max_value = values[0];
-	int current_frequency;
+	//calculate the value with the higher frecuency in out k points
+	max_frequency = 1;
+	return_value = values[0];
 	for(kindex = 0; kindex < k; kindex++) {
 		current_frequency = 1;
+		/*find other points with the same value
+		going from kindex+1 because if the value was before the current
+		point than was already counted
+		*/
 		for(jidnex = kindex + 1; jindex < k; jidnex++) {
 			if(values[kindex] == values[jidnex]) {
 				current_frequency = current_frequency + 1;
-				if(current_frequency > max_frequency) {
-					max_value = values[kindex];
-				}
 			}
+		}
+		//if it is the the new max frequency value
+		if(current_frequency > max_frequency) {
+			return_value = values[kindex];
+			max_frequency = current_frequency;
 		}
 	}
 	
-	return max_value; 
+	return return_value; 
 } 
 
 int main() 
-{ 
-
-
-	T_DATA test_data[INPUT_LENGTH] = {5.4,3.7,1.5,0.2};
-	size_t n = TRAINING_DATA_LENGTH; // Number of data points 
-	size_t k = K_VALUE; 
-
+{
 	// Parameter to decide groupr of the testing point 
-	size_t a = classifyAPoint(training_data_X, training_data_Y, n, k, test_data); 
+	size_t answer = classifyAPoint(g_training_data_X, g_training_data_Y,
+												 TRAINING_DATA_LENGTH, INPUT_LENGTH,
+												 g_test_data, K_VALUE, g_distances,
+												 g_values); 
 
   #ifdef DEBUG
-    printf("Result: %d\n", a);
+    printf("Result: %d\n", answer);
   #endif
 	return 0; 
 } 

@@ -1,373 +1,89 @@
 // KMEANS
 // https://www.geeksforgeeks.org/k-means-clustering-introduction/
-// training data: https://github.com/antmarakis/Machine-Learning/blob/master/Clustering/kMeans%20-%20Standard/data.txt
+// Ciocirlan Stefan-Dan 14.05.2019
 
 #include <stdlib.h>
 #include "util.h"
+#include "../common/common.h"
 
-#define T_DATA float
-#define TRAINING_DATA_LENGTH 150
-#define INPUT_LENGTH 4
 #define K_VALUE 7
 #define MAX_ITERATIONS 40
 
-T_DATA training_data_X [TRAINING_DATA_LENGTH][INPUT_LENGTH] = {
-{5.1,3.5,1.4,0.2},
-{4.9,3.0,1.4,0.2},
-{4.7,3.2,1.3,0.2},
-{4.6,3.1,1.5,0.2},
-{5.0,3.6,1.4,0.2},
-{5.4,3.9,1.7,0.4},
-{4.6,3.4,1.4,0.3},
-{5.0,3.4,1.5,0.2},
-{4.4,2.9,1.4,0.2},
-{4.9,3.1,1.5,0.1},
-{5.4,3.7,1.5,0.2},
-{4.8,3.4,1.6,0.2},
-{4.8,3.0,1.4,0.1},
-{4.3,3.0,1.1,0.1},
-{5.8,4.0,1.2,0.2},
-{5.7,4.4,1.5,0.4},
-{5.4,3.9,1.3,0.4},
-{5.1,3.5,1.4,0.3},
-{5.7,3.8,1.7,0.3},
-{5.1,3.8,1.5,0.3},
-{5.4,3.4,1.7,0.2},
-{5.1,3.7,1.5,0.4},
-{4.6,3.6,1.0,0.2},
-{5.1,3.3,1.7,0.5},
-{4.8,3.4,1.9,0.2},
-{5.0,3.0,1.6,0.2},
-{5.0,3.4,1.6,0.4},
-{5.2,3.5,1.5,0.2},
-{5.2,3.4,1.4,0.2},
-{4.7,3.2,1.6,0.2},
-{4.8,3.1,1.6,0.2},
-{5.4,3.4,1.5,0.4},
-{5.2,4.1,1.5,0.1},
-{5.5,4.2,1.4,0.2},
-{4.9,3.1,1.5,0.1},
-{5.0,3.2,1.2,0.2},
-{5.5,3.5,1.3,0.2},
-{4.9,3.1,1.5,0.1},
-{4.4,3.0,1.3,0.2},
-{5.1,3.4,1.5,0.2},
-{5.0,3.5,1.3,0.3},
-{4.5,2.3,1.3,0.3},
-{4.4,3.2,1.3,0.2},
-{5.0,3.5,1.6,0.6},
-{5.1,3.8,1.9,0.4},
-{4.8,3.0,1.4,0.3},
-{5.1,3.8,1.6,0.2},
-{4.6,3.2,1.4,0.2},
-{5.3,3.7,1.5,0.2},
-{5.0,3.3,1.4,0.2},
-{7.0,3.2,4.7,1.4},
-{6.4,3.2,4.5,1.5},
-{6.9,3.1,4.9,1.5},
-{5.5,2.3,4.0,1.3},
-{6.5,2.8,4.6,1.5},
-{5.7,2.8,4.5,1.3},
-{6.3,3.3,4.7,1.6},
-{4.9,2.4,3.3,1.0},
-{6.6,2.9,4.6,1.3},
-{5.2,2.7,3.9,1.4},
-{5.0,2.0,3.5,1.0},
-{5.9,3.0,4.2,1.5},
-{6.0,2.2,4.0,1.0},
-{6.1,2.9,4.7,1.4},
-{5.6,2.9,3.6,1.3},
-{6.7,3.1,4.4,1.4},
-{5.6,3.0,4.5,1.5},
-{5.8,2.7,4.1,1.0},
-{6.2,2.2,4.5,1.5},
-{5.6,2.5,3.9,1.1},
-{5.9,3.2,4.8,1.8},
-{6.1,2.8,4.0,1.3},
-{6.3,2.5,4.9,1.5},
-{6.1,2.8,4.7,1.2},
-{6.4,2.9,4.3,1.3},
-{6.6,3.0,4.4,1.4},
-{6.8,2.8,4.8,1.4},
-{6.7,3.0,5.0,1.7},
-{6.0,2.9,4.5,1.5},
-{5.7,2.6,3.5,1.0},
-{5.5,2.4,3.8,1.1},
-{5.5,2.4,3.7,1.0},
-{5.8,2.7,3.9,1.2},
-{6.0,2.7,5.1,1.6},
-{5.4,3.0,4.5,1.5},
-{6.0,3.4,4.5,1.6},
-{6.7,3.1,4.7,1.5},
-{6.3,2.3,4.4,1.3},
-{5.6,3.0,4.1,1.3},
-{5.5,2.5,4.0,1.3},
-{5.5,2.6,4.4,1.2},
-{6.1,3.0,4.6,1.4},
-{5.8,2.6,4.0,1.2},
-{5.0,2.3,3.3,1.0},
-{5.6,2.7,4.2,1.3},
-{5.7,3.0,4.2,1.2},
-{5.7,2.9,4.2,1.3},
-{6.2,2.9,4.3,1.3},
-{5.1,2.5,3.0,1.1},
-{5.7,2.8,4.1,1.3},
-{6.3,3.3,6.0,2.5},
-{5.8,2.7,5.1,1.9},
-{7.1,3.0,5.9,2.1},
-{6.3,2.9,5.6,1.8},
-{6.5,3.0,5.8,2.2},
-{7.6,3.0,6.6,2.1},
-{4.9,2.5,4.5,1.7},
-{7.3,2.9,6.3,1.8},
-{6.7,2.5,5.8,1.8},
-{7.2,3.6,6.1,2.5},
-{6.5,3.2,5.1,2.0},
-{6.4,2.7,5.3,1.9},
-{6.8,3.0,5.5,2.1},
-{5.7,2.5,5.0,2.0},
-{5.8,2.8,5.1,2.4},
-{6.4,3.2,5.3,2.3},
-{6.5,3.0,5.5,1.8},
-{7.7,3.8,6.7,2.2},
-{7.7,2.6,6.9,2.3},
-{6.0,2.2,5.0,1.5},
-{6.9,3.2,5.7,2.3},
-{5.6,2.8,4.9,2.0},
-{7.7,2.8,6.7,2.0},
-{6.3,2.7,4.9,1.8},
-{6.7,3.3,5.7,2.1},
-{7.2,3.2,6.0,1.8},
-{6.2,2.8,4.8,1.8},
-{6.1,3.0,4.9,1.8},
-{6.4,2.8,5.6,2.1},
-{7.2,3.0,5.8,1.6},
-{7.4,2.8,6.1,1.9},
-{7.9,3.8,6.4,2.0},
-{6.4,2.8,5.6,2.2},
-{6.3,2.8,5.1,1.5},
-{6.1,2.6,5.6,1.4},
-{7.7,3.0,6.1,2.3},
-{6.3,3.4,5.6,2.4},
-{6.4,3.1,5.5,1.8},
-{6.0,3.0,4.8,1.8},
-{6.9,3.1,5.4,2.1},
-{6.7,3.1,5.6,2.4},
-{6.9,3.1,5.1,2.3},
-{5.8,2.7,5.1,1.9},
-{6.8,3.2,5.9,2.3},
-{6.7,3.3,5.7,2.5},
-{6.7,3.0,5.2,2.3},
-{6.3,2.5,5.0,1.9},
-{6.5,3.0,5.2,2.0},
-{6.2,3.4,5.4,2.3},
-{5.9,3.0,5.1,1.8}
-}
 
-T_DATA training_data_Y [TRAINING_DATA_LENGTH] = {
-{0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2
-}
-
-int training_position_cluster[TRAINING_DATA_LENGTH];
 //cluster
-T_DATA cluster_mean[K_VALUE][INPUT_LENGTH];
-int cluster_len[K_VALUE];
+size_t g_training_position_cluster[TRAINING_DATA_LENGTH];
+element_t g_cluster_mean[K_VALUE][INPUT_LENGTH];
+size_t g_cluster_len[K_VALUE];
+element_t g_cluster_value[K_VALUE];
 
-T_DATA euclidian_distance (T_DATA X[INPUT_LENGTH], T_DATA Y[INPUT_LENGTH]) {
-    int index;
-    T_DATA sum 0.0;
-    for(index = 0; index < INPUT_LENGTH; index++) {
+/* Calculate the euclidian distance between vectors X and Y with a length given
+*/
+element_t euclidian_distance_square (element_t X[], element_t Y[], size_t length) {
+    size_t index;
+    element_t sum = 0;
+    for(index = 0; index < length; index++) {
         sum = sum + (X[index]-Y[index])*(X[index]-Y[index]);
     }
     return sum;
 }
 
-void calculate_inital_means() {
-    int index, jindex, kindex;
-    T_DATA mins [INPUT_LENGTH];
-    T_DATA maxs [INPUT_LENGTH];
+/*
+* Initialize the cluster means and training data point position in cluster
+*/
+void initialise_cluster(element_t training_data_X[][], size_t training_position_cluster[],
+                        size_t training_data_length, size_t input_length,
+                        element_t cluster_mean[][], size_t cluster_len[],
+                        size_t k) {
+    size_t index, jindex, kindex;
+    element_t min;
+    element_t max;
     
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        mins[index] = training_data_X[0][index];
-        maxs[index] = training_data_X[0][index];
+    // position in no cluster at the begining
+    for(jindex = 0; jindex < training_data_length; jindex++) {
+        training_position_cluster[jindex] = -1;
     }
 
-    for(jindex = 1; jindex < TRAINING_DATA_LENGTH; jindex++) {
-        training_position_cluster[jindex] = -1;
-        for(index = 0; index < INPUT_LENGTH; index++) {
-            if(mins[index] > training_data_X[jindex][index]) {
-                mins[index] = training_data_X[jindex][index];
+    //every cluster does'n have any points inside
+    for(kindex = 0; kindex < k; kindex++) {
+        cluster_len[kindex] = 0;
+    }
+
+    /*
+    * Calculate the minimum and maximum value for every column of input
+    * and then generates k intervals of the same size between minimum
+    * value and maximum value. This right value of the interval will
+    * become de mean for a cluster
+    */
+    for(index = 0; index < input_length; index++) {
+        min = training_data_X[0][index];
+        max = training_data_X[0][index];
+        for(jindex = 1; jindex < training_data_length; jindex++) {
+            if(min > training_data_X[jindex][index]) {
+                mins = training_data_X[jindex][index];
             }
-            if(maxs[index] < training_data_X[jindex][index]) {
-                maxs[index] = training_data_X[jindex][index];
+            if(max < training_data_X[jindex][index]) {
+                max = training_data_X[jindex][index];
             }
         }
-    }
-
-    for(kindex = 0; kindex < K_VALUE; kindex++) {
-        cluster_len[kindex] = 0;
-        for(index = 0; index < INPUT_LENGTH; index++) {
-            cluster_mean[kindex][index] = mins[index] + (maxs[index] - mins[index]) * kindex / K_VALUE;
+        for(kindex = 0; kindex < k; kindex++) {
+            cluster_mean[kindex][index] = min + (max - min) * kindex / k;
         }
     }
 }
-
-int classify_cluster(T_DATA X[INPUT_LENGTH]) {
-    int kindex;
-    float min = euclidian_distance(X, cluster_mean[0]);
-    float aux;
-    int return_index = 0;
-    for(kindex = 1; kindex < K_VALUE; kindex++) {
-        aux = euclidian_distance(X, cluster_mean[kindex]);
+/*
+* It calculates the colsest cluster mean to the given point X and return
+* the cluster index
+*/
+size_t classify_cluster(element_t X[], element_t cluster_mean[][],
+                        size_t input_length, size_t k) {
+    size_t kindex;
+    element_t min;
+    element_t aux;
+    size_t return_index;
+    min = euclidian_distance_square(X, cluster_mean[0], input_length);
+    return_index = 0;
+    for(kindex = 1; kindex < k; kindex++) {
+        aux = euclidian_distance_square(X, cluster_mean[kindex], input_length);
         if(min > aux) {
             min = aux;
             return_index = kindex;
@@ -376,38 +92,62 @@ int classify_cluster(T_DATA X[INPUT_LENGTH]) {
     return return_index;
 }
 
-void update_mean_minus(T_DATA X[INPUT_LENGTH], int kindex) {
-    int index;
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        cluster_mean[kindex][index] = (cluster_mean[kindex][index] * cluster_len[kindex] - X[index]) / (cluster_len[kindex] - 1);
+/*
+* it deletes the X point from the cluster and recalculate the mean
+*/
+void update_mean_minus(element_t X[], element_t cluster_mean[][],
+                       size_t cluster_len[], size_t input_length,
+                       size_t kindex) {
+    size_t index;
+    for(index = 0; index < input_length; index++) {
+        cluster_mean[kindex][index] = (cluster_mean[kindex][index] * cluster_len[kindex] - X[index])
+                                       / (cluster_len[kindex] - 1);
     }
     cluster_len[kindex] = cluster_len[kindex] - 1;
 }
 
-
-void update_mean_plus(T_DATA X[INPUT_LENGTH], int kindex) {
-    int index;
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        cluster_mean[kindex][index] = (cluster_mean[kindex][index] * cluster_len[kindex] + X[index]) / (cluster_len[kindex] + 1);
+/*
+* it add the X point to the cluster and recalculate the mean
+*/
+void update_mean_plus(element_t X[], element_t cluster_mean[][],
+                       size_t cluster_len[], size_t input_length,
+                       size_t kindex)  {
+    size_t index;
+    for(index = 0; index < input_length; index++) {
+        cluster_mean[kindex][index] = (cluster_mean[kindex][index] * cluster_len[kindex] + X[index])
+                                      / (cluster_len[kindex] + 1);
     }
     cluster_len[kindex] = cluster_len[kindex] + 1;
 }
 
-void creating_clusters() {
-    int index, jindex, kindex, old_kindex;
-    int has_changed;
-    int rindex;
-    calculate_inital_means();
-    for(rindex = 0; rindex < MAX_ITERATIONS; rindex++) {
+/*
+* It is training the a kmeans clusters with training_data_X
+*/
+void training_kmeans(element_t training_data_X[][], size_t training_position_cluster[],
+                        size_t training_data_length, size_t input_length,
+                        element_t cluster_mean[][], size_t cluster_len[],
+                        size_t k, size_t max_iterations) {
+    size_t index, jindex, kindex, old_kindex;
+    size_t has_changed;
+    size_t rindex;
+    //do a maximum number of iterations to every node
+    for(rindex = 0; rindex < max_iterations; rindex++) {
         has_changed = 0;
-        for(jindex = 0; jindex < TRAINING_DATA_LENGTH; jindex++) {
+        /*
+        *for every point from the training data calculates the cluster index
+        *if is different from its old cluster than update both clusters
+        */
+        for(jindex = 0; jindex < training_data_length; jindex++) {
             old_kindex = training_position_cluster[jindex];
-            kindex = classify_cluster(X);
+            kindex = classify_cluster(training_data_X[jindex], cluster_mean,
+                                      input_length, k);
             if(kindex != old_kindex) {
                 if(old_kindex != -1) {
-                    update_mean_minus(training_data_X[jindex], old_kindex);
+                    update_mean_minus(training_data_X[jindex], cluster_mean,
+                                      cluster_len, input_length, old_kindex);
                 }
-                update_mean_plus(training_data_X[jindex], kindex);
+                update_mean_plus(training_data_X[jindex], cluster_mean,
+                                    cluster_len, input_length, kindex);
                 training_position_cluster[jindex] = kindex;
                 has_changed = 1;
             }
@@ -418,11 +158,77 @@ void creating_clusters() {
     }
 }
 
+/*
+* Find the values with the higher frecuency in every cluster
+*/
+void kmeans_clusters_value(element_t cluster_value[],
+                              element_t training_data_Y[], size_t training_position_cluster[],
+                              size_t training_data_length, size_t k) {
+    size_t index, jidenx, kindex;
+    size_t current_frequency;
+    size_t max_frequency;
+    for(kindex = 0; kindex < k; kindex++) {
+        max_frequency = 0;
+        for(jindex = 0; jindex < training_data_length; jindex++) {
+            if(training_position_cluster[jindex] == kindex) {
+                current_frequency = 1;
+                /*
+                * Search the same value in the next points in training data,
+                * because if the values has also before it was already counted
+                */
+                for(index = jidnex + 1; index < training_data_length; index++) {
+                    if(training_position_cluster[index] == kindex) {
+                        if(training_data_Y[jidnex] == training_data_Y[index]) {
+                            current_frequency = current_frequency + 1;
+                        }
+                    }
+                }
+                //if it is the the new max frequency value
+                if(current_frequency > max_frequency) {
+                    cluster_value[kindex] = training_data_Y[jindex];
+                    max_frequency = current_frequency;
+                }
+            }
+        }
+    }
+
+    
+}
+
+/*
+* Given a test_data it finds the cluster and return the value of the cluster
+*/
+element_t classify_kmeans(element_t test_data[], element_t cluster_value[],
+                          size_t input_length,
+                          element_t cluster_mean[][], size_t k) {
+    size_t kindex;
+    element_t return_value;
+    kindex = classify_cluster(test_data, cluster_mean, input_length, k);
+    return_value = cluster_value[kindex];
+    return return_value;
+}
+
 
 int main(void)
 {
-    T_DATA test_data[INPUT_LENGTH] = {5.4,3.7,1.5,0.2};
-    creating_clusters();
-    int b = classify_cluster(test_data);
+
+    //initialise the cluster
+    initialise_cluster(g_training_data_X, g_training_position_cluster,
+                       TRAINING_DATA_LENGTH, INPUT_LENGTH,
+                       g_cluster_mean, g_cluster_len,
+                       K_VALUE);
+    training_kmeans(g_training_data_X, g_training_position_cluster,
+                    TRAINING_DATA_LENGTH, INPUT_LENGTH,
+                    g_cluster_mean, g_cluster_len,
+                    K_VALUE, MAX_ITERATIONS);
+    kmeans_clusters_value(g_cluster_value,
+                          g_training_data_Y, g_training_position_cluster,
+                          TRAINING_DATA_LENGTH, K_VALUE)
+    element_t answer = classify_kmeans(g_test_data, g_cluster_value,
+                                       INPUT_LENGTH,
+                                       g_cluster_mean[][], K_VALUE);
+    #ifdef DEBUG
+        printf("Result: %f\n", answer);
+    #endif
     return 0;
 }

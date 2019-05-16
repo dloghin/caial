@@ -1,454 +1,230 @@
 //NB
 // https://msdn.microsoft.com/en-us/magazine/jj891056.aspx
 // https://www.machinelearningplus.com/predictive-modeling/how-naive-bayes-algorithm-works-with-example-and-full-code/
-
+// Ciocirlan Stefan-Dan 14.05.2019
 #include <stdlib.h>
 #include "util.h"
+#include "../common/common.h"
+
+#define INPUT_GROUPS_LENGTH 5
+#define OUTPUT_GROUPS_LENGTH 3
+
+size_t g_training_data_X_BNB [TRAINING_DATA_LENGTH][INPUT_LENGTH];
+size_t g_training_data_Y_BNB [TRAINING_DATA_LENGTH];
+size_t g_test_data_BNB[INPUT_LENGTH]
+size_t g_joints[INPUT_LENGTH][INPUT_GROUPS_LENGTH][OUTPUT_GROUPS_LENGTH];
+size_t g_dep_joints[OUTPUT_GROUPS_LENGTH];
+real_t g_partial_probability[OUTPUT_GROUPS_LENGTH];
+real_t g_probability[OUTPUT_GROUPS_LENGTH];
 
 
-#define TRAINING_DATA_LENGTH 150
-#define INPUT_LENGTH 4
-#define K_VALUE 5
-#define C_VALUE 3
-
-T_DATA training_data_X [TRAINING_DATA_LENGTH][INPUT_LENGTH] = {
-{5.1,3.5,1.4,0.2},
-{4.9,3.0,1.4,0.2},
-{4.7,3.2,1.3,0.2},
-{4.6,3.1,1.5,0.2},
-{5.0,3.6,1.4,0.2},
-{5.4,3.9,1.7,0.4},
-{4.6,3.4,1.4,0.3},
-{5.0,3.4,1.5,0.2},
-{4.4,2.9,1.4,0.2},
-{4.9,3.1,1.5,0.1},
-{5.4,3.7,1.5,0.2},
-{4.8,3.4,1.6,0.2},
-{4.8,3.0,1.4,0.1},
-{4.3,3.0,1.1,0.1},
-{5.8,4.0,1.2,0.2},
-{5.7,4.4,1.5,0.4},
-{5.4,3.9,1.3,0.4},
-{5.1,3.5,1.4,0.3},
-{5.7,3.8,1.7,0.3},
-{5.1,3.8,1.5,0.3},
-{5.4,3.4,1.7,0.2},
-{5.1,3.7,1.5,0.4},
-{4.6,3.6,1.0,0.2},
-{5.1,3.3,1.7,0.5},
-{4.8,3.4,1.9,0.2},
-{5.0,3.0,1.6,0.2},
-{5.0,3.4,1.6,0.4},
-{5.2,3.5,1.5,0.2},
-{5.2,3.4,1.4,0.2},
-{4.7,3.2,1.6,0.2},
-{4.8,3.1,1.6,0.2},
-{5.4,3.4,1.5,0.4},
-{5.2,4.1,1.5,0.1},
-{5.5,4.2,1.4,0.2},
-{4.9,3.1,1.5,0.1},
-{5.0,3.2,1.2,0.2},
-{5.5,3.5,1.3,0.2},
-{4.9,3.1,1.5,0.1},
-{4.4,3.0,1.3,0.2},
-{5.1,3.4,1.5,0.2},
-{5.0,3.5,1.3,0.3},
-{4.5,2.3,1.3,0.3},
-{4.4,3.2,1.3,0.2},
-{5.0,3.5,1.6,0.6},
-{5.1,3.8,1.9,0.4},
-{4.8,3.0,1.4,0.3},
-{5.1,3.8,1.6,0.2},
-{4.6,3.2,1.4,0.2},
-{5.3,3.7,1.5,0.2},
-{5.0,3.3,1.4,0.2},
-{7.0,3.2,4.7,1.4},
-{6.4,3.2,4.5,1.5},
-{6.9,3.1,4.9,1.5},
-{5.5,2.3,4.0,1.3},
-{6.5,2.8,4.6,1.5},
-{5.7,2.8,4.5,1.3},
-{6.3,3.3,4.7,1.6},
-{4.9,2.4,3.3,1.0},
-{6.6,2.9,4.6,1.3},
-{5.2,2.7,3.9,1.4},
-{5.0,2.0,3.5,1.0},
-{5.9,3.0,4.2,1.5},
-{6.0,2.2,4.0,1.0},
-{6.1,2.9,4.7,1.4},
-{5.6,2.9,3.6,1.3},
-{6.7,3.1,4.4,1.4},
-{5.6,3.0,4.5,1.5},
-{5.8,2.7,4.1,1.0},
-{6.2,2.2,4.5,1.5},
-{5.6,2.5,3.9,1.1},
-{5.9,3.2,4.8,1.8},
-{6.1,2.8,4.0,1.3},
-{6.3,2.5,4.9,1.5},
-{6.1,2.8,4.7,1.2},
-{6.4,2.9,4.3,1.3},
-{6.6,3.0,4.4,1.4},
-{6.8,2.8,4.8,1.4},
-{6.7,3.0,5.0,1.7},
-{6.0,2.9,4.5,1.5},
-{5.7,2.6,3.5,1.0},
-{5.5,2.4,3.8,1.1},
-{5.5,2.4,3.7,1.0},
-{5.8,2.7,3.9,1.2},
-{6.0,2.7,5.1,1.6},
-{5.4,3.0,4.5,1.5},
-{6.0,3.4,4.5,1.6},
-{6.7,3.1,4.7,1.5},
-{6.3,2.3,4.4,1.3},
-{5.6,3.0,4.1,1.3},
-{5.5,2.5,4.0,1.3},
-{5.5,2.6,4.4,1.2},
-{6.1,3.0,4.6,1.4},
-{5.8,2.6,4.0,1.2},
-{5.0,2.3,3.3,1.0},
-{5.6,2.7,4.2,1.3},
-{5.7,3.0,4.2,1.2},
-{5.7,2.9,4.2,1.3},
-{6.2,2.9,4.3,1.3},
-{5.1,2.5,3.0,1.1},
-{5.7,2.8,4.1,1.3},
-{6.3,3.3,6.0,2.5},
-{5.8,2.7,5.1,1.9},
-{7.1,3.0,5.9,2.1},
-{6.3,2.9,5.6,1.8},
-{6.5,3.0,5.8,2.2},
-{7.6,3.0,6.6,2.1},
-{4.9,2.5,4.5,1.7},
-{7.3,2.9,6.3,1.8},
-{6.7,2.5,5.8,1.8},
-{7.2,3.6,6.1,2.5},
-{6.5,3.2,5.1,2.0},
-{6.4,2.7,5.3,1.9},
-{6.8,3.0,5.5,2.1},
-{5.7,2.5,5.0,2.0},
-{5.8,2.8,5.1,2.4},
-{6.4,3.2,5.3,2.3},
-{6.5,3.0,5.5,1.8},
-{7.7,3.8,6.7,2.2},
-{7.7,2.6,6.9,2.3},
-{6.0,2.2,5.0,1.5},
-{6.9,3.2,5.7,2.3},
-{5.6,2.8,4.9,2.0},
-{7.7,2.8,6.7,2.0},
-{6.3,2.7,4.9,1.8},
-{6.7,3.3,5.7,2.1},
-{7.2,3.2,6.0,1.8},
-{6.2,2.8,4.8,1.8},
-{6.1,3.0,4.9,1.8},
-{6.4,2.8,5.6,2.1},
-{7.2,3.0,5.8,1.6},
-{7.4,2.8,6.1,1.9},
-{7.9,3.8,6.4,2.0},
-{6.4,2.8,5.6,2.2},
-{6.3,2.8,5.1,1.5},
-{6.1,2.6,5.6,1.4},
-{7.7,3.0,6.1,2.3},
-{6.3,3.4,5.6,2.4},
-{6.4,3.1,5.5,1.8},
-{6.0,3.0,4.8,1.8},
-{6.9,3.1,5.4,2.1},
-{6.7,3.1,5.6,2.4},
-{6.9,3.1,5.1,2.3},
-{5.8,2.7,5.1,1.9},
-{6.8,3.2,5.9,2.3},
-{6.7,3.3,5.7,2.5},
-{6.7,3.0,5.2,2.3},
-{6.3,2.5,5.0,1.9},
-{6.5,3.0,5.2,2.0},
-{6.2,3.4,5.4,2.3},
-{5.9,3.0,5.1,1.8}
-}
-
-int training_data_Y [TRAINING_DATA_LENGTH] = {
-{0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-0,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-1,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2,
-2
-}
-
-T_DATA test_data[INPUT_LENGTH] = {5.4,3.7,1.5,0.2};
-
-int training_data_X_BNB [TRAINING_DATA_LENGTH][INPUT_LENGTH];
-int test_data_BNB[INPUT_LENGTH]
-int joints[INPUT_LENGTH][K_VALUE][C_VALUE];
-int dep_joints[C_VALUE];
-T_DATA partial_probability[C_VALUE];
-T_DATA probability[C_VALUE];
-
-void calculate_inital_part() {
-    int index, jindex, kindex;
-    T_DATA mins [INPUT_LENGTH];
-    T_DATA maxs [INPUT_LENGTH];
-    T_DATA values [INPUT_LENGTH][K_VALUE];
     
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        mins[index] = training_data_X[0][index];
-        maxs[index] = training_data_X[0][index];
-    }
+/*
+* converts to a format that works with BNB by grouping interval of values
+* at the same value
+*/
+void convert_to_BNB_memory(element_t training_data_X[][], element_t training_data_Y[],
+                    element_t test_data[],
+                    size_t training_data_length, size_t input_length,
+                    size_t training_data_X_BNB[][], size_t training_data_Y_BNB[],
+                    size_t test_data_BNB[],
+                    size_t input_groups_length, size_t output_groups_length) {
+    size_t index, jindex, kindex;
+    element_t min;
+    element_t max;
+    element_t value;
 
-    for(jindex = 1; jindex < TRAINING_DATA_LENGTH; jindex++) {
-        for(index = 0; index < INPUT_LENGTH; index++) {
-            if(mins[index] > training_data_X[jindex][index]) {
-                mins[index] = training_data_X[jindex][index];
+    //Converting traininf_data_X and test_data
+    for(index = 0; index < input_length; index++) {
+        // Find the minimum and maximum value for the current input column
+        min = training_data_X[0][index];
+        max = training_data_X[0][index];
+        for(jindex = 1; jindex < training_data_length; jindex++) {
+            if(min > training_data_X[jindex][index]) {
+                min = training_data_X[jindex][index];
             }
-            if(maxs[index] < training_data_X[jindex][index]) {
-                maxs[index] = training_data_X[jindex][index];
+            if(max < training_data_X[jindex][index]) {
+                max = training_data_X[jindex][index];
             }
         }
-    }
-
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        for(kindex = 0; kindex < K_VALUE; kindex++) {
-            values[index][kindex] = mins[index] + ((maxs[index] - mins[index]) * (kindex+1)) / K_VALUE;
+        //setting all to the biggest group value
+        for(jindex = 0; jindex < training_data_length; jindex++) {
+            training_data_X_BNB[jindex][index] = input_groups_length - 1;
         }
-    }
+        test_data_BNB[index] = input_groups_length - 1;
 
-
-    for(jindex = 0; jindex < TRAINING_DATA_LENGTH; jindex++) {
-        for(index = 0; index < INPUT_LENGTH; index++) {
-            for(kindex = 0; kindex < K_VALUE; kindex++) {
-                if(training_data_X[jindex][index] <= values[index][kindex]) {
+        /* going trough every group if the input value is lower
+        * than the maximum value of the group add the current input to
+        * to the group
+        */
+        for(kindex = input_groups_length - 2; kindex > -1; kindex--) {
+            value = min + ((max - min) * (kindex+1)) / input_groups_length;
+            for(jindex = 0; jindex < training_data_length; jindex++) {
+                if(training_data_X[jindex][index] <= value) {
                     training_data_X_BNB[jindex][index] = kindex;
-                    break;
                 }
             }
-        }
-    }
-
-
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        for(kindex = 0; kindex < K_VALUE; kindex++) {
-            if(test_data[index] <= values[index][kindex]) {
+            if(test_data[index] <= value) {
                 test_data_BNB[index] = kindex;
-                break;
             }
         }
     }
+
+    //doing the same thing but for output
+    min = training_data_Y[0];
+    max = training_data_Y[0];
+    for(jindex = 1; jindex < training_data_length; jindex++) {
+        if(min > training_data_Y[jindex]) {
+            min = training_data_Y[jindex];
+        }
+        if(max < training_data_Y[jindex]) {
+            max = training_data_Y[jindex];
+        }
+    }
+
+    for(jindex = 0; jindex < training_data_length; jindex++) {
+        training_data_Y_BNB[jindex] = output_groups_length - 1;
+    }
+
+    for(kindex = output_groups_length - 2; kindex > -1; kindex--) {
+        value = min + ((max - min) * (kindex+1)) / output_groups_length;
+        for(jindex = 0; jindex < training_data_length; jindex++) {
+            if(training_data_Y[jindex] <= value) {
+                training_data_Y_BNB[jindex] = kindex;
+            }
+        }
+    }
+
 }
 
-int main(void)
-{
-    calculate_inital_part();
-    int index, jidnex, kindex, vindex;
-    int pindex;
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        for(kindex = 0; kindex < K_VALUE; kindex++) {
-            for(vindex = 0; vindex < C_VALUE; vindex++) {
-                joints[index][kindex][vindex] = 0;
+/* Training the BNB
+* joints [index][kindex][vindex] - how many elements of traning_data_X has on column
+* index the value kindex and on training_data_Y has value vindex
+* dep_joints[vindex] - how many elements in training_data_Y has value vindex
+*/
+void training_BNB(size_t training_data_X[][], size_t training_data_Y[],
+                    size_t training_data_length, size_t input_length,
+                    size_t input_groups_length, size_t output_groups_length,
+                    size_t joints[][][], size_t dep_joints[]) {
+    size_t index, jindex, kindex, vindex;
+
+    /*
+    Initialize joints
+    1 - if you want Laplacian Smoothing
+    0 - otherwise
+    */
+    for(index = 0; index < input_length; index++) {
+        for(kindex = 0; kindex < input_groups_length; kindex++) {
+            for(vindex = 0; vindex < output_groups_length; vindex++) {
+                joints[index][kindex][vindex] = 1;
             }
         }
     }
 
-    for(jindex = 0; jindex < TRAINING_DATA_LENGTH; jindex++) {
-        for(index = 0; index < INPUT_LENGTH; index++) {
-            for(kindex = 0; kindex < K_VALUE; kindex++) {
-                for(vindex = 0; vindex < C_VALUE; vindex++) {
-                    if(training_data_Y[jidnex] == vindex && training_data_X_BNB[jidnex][index] == kindex) {
-                        joints[index][kindex][vindex] = joints[index][kindex][vindex] + 1;
-                    }
-                }
-            }
+    //calculate the joints
+    for(jindex = 0; jindex < training_data_length; jindex++) {
+        for(index = 0; index < input_length; index++) {
+            kindex = training_data_X[jidnex][index];
+            vindex = training_data_Y[jidnex];
+            joints[index][kindex][vindex] = joints[index][kindex][vindex] + 1;
         }
     }
 
-
-    for(vindex = 0; vindex < C_VALUE; vindex++) {
+    //calculate the dep_joints
+    for(vindex = 0; vindex < output_groups_length; vindex++) {
         dep_joints[vindex] = 0;
     }
-    for(jindex = 0; jindex < TRAINING_DATA_LENGTH; jindex++) {
-        for(vindex = 0; vindex < C_VALUE; vindex++) {
-            if(training_data_Y[jidnex] == vindex) {
-                dep_joints[vindex] = dep_joints[vindex] + 1;
-            }
-        }
+    for(jindex = 0; jindex < training_data_length; jindex++) {
+        vindex = training_data_Y[jidnex];
+        dep_joints[vindex] = dep_joints[vindex] + 1;
+    }
+}
+
+size_t classify_BNB(size_t test_data[], size_t input_length,
+                    size_t input_groups_length, size_t output_groups_length,
+                    size_t joints[][][], size_t dep_joints[],
+                    real_t partial_probability[], real_t probability[]) {
+
+    size_t index, jidenx, kindex, pindex;
+    size_t elements_number;
+    real_t partial_probability_sum;
+    real_t max_probability;
+    size_t return_value;
+    
+    //initialise the partial probabilities with 1.0
+    for(pindex = 0; pindex < output_groups_length; pindex++) {
+        partial_probability[pindex] = 1.0;
     }
 
-
-    for(pindex = 0; pindex < C_VALUE; pindex++) {
-        partial_probability[pindex] = 1;
-    }
-
-    T_DATA total_sum = 0;
-    for(index = 0; index < INPUT_LENGTH; index++) {
-        for(pindex = 0; pindex < C_VALUE; pindex++) {
+    /* Caculate de partial probability by multipling with probability
+    * every input to happen for the given output
+    * pp[Y|X] = prod for i in X_length of p(Y|Xi)
+                /total_number_of_elements
+    * p(Y/Xi) = joints with value Xi on column I and value Y on training_data_Y are
+                / number of elements in training_data_Y with value Y
+    */
+    for(index = 0; index < input_length; index++) {
+        for(pindex = 0; pindex < output_groups_length; pindex++) {
             partial_probability[pindex] = partial_probability[pindex]
-            * joints[index][test_data_BNB[index]][pindex] / dep_joints[pindex];
+            * joints[index][test_data[index]][pindex] / dep_joints[pindex];
         }
     }
-    for(pindex = 0; pindex < C_VALUE; pindex++) {
-        total_sum = total_sum + dep_joints[pindex];
+    /* calcualte the total_number_of_elements and find every partial probability
+    */
+    elements_number = 0;
+    for(pindex = 0; pindex < output_groups_length; pindex++) {
+        elements_number = elements_number + dep_joints[pindex];
     }
-    for(pindex = 0; pindex < C_VALUE; pindex++) {
+    for(pindex = 0; pindex < output_groups_length; pindex++) {
         partial_probability[pindex] = partial_probability[pindex]
-        * dep_joints[pindex] / total_sum;
+        * dep_joints[pindex] / elements_number;
     }
-    total_sum = 0;
-    for(pindex = 0; pindex < C_VALUE; pindex++) {
-        total_sum = total_sum + partial_probability[pindex];
+
+    partial_probability_sum = 0;
+    /* calcualte the sum of partial probabilities
+    */
+    for(pindex = 0; pindex < output_groups_length; pindex++) {
+        partial_probability_sum = partial_probability_sum + partial_probability[pindex];
     }
-    for(pindex = 0; pindex < C_VALUE; pindex++) {
-        probability[pindex] = partial_probability[pindex] / total_sum;
+    /*
+    * calculate every probability dor output
+    * p(Y|Xi) = pp(Y|Xi) / sum for j in Y_VALUES of pp(yj|Xi)
+    */
+    for(pindex = 0; pindex < output_groups_length; pindex++) {
+        probability[pindex] = partial_probability[pindex] / partial_probability_sum;
     }
     
-    T_DATA max_p = probability[0];
-    int poz = 0;
-    for(pindex = 1; pindex < C_VALUE; pindex++) {
-        if(probability[pindex] > max_p) {
-            max_p = probability[pindex];
-            poz = pindex;
+    /* chose the biggest probability
+    */
+    max_probability = probability[0];
+    return_value = 0;
+    for(pindex = 1; pindex < output_groups_length; pindex++) {
+        if(probability[pindex] > max_probability) {
+            max_probability = probability[pindex];
+            return_value = pindex;
         }
     }
-    
+    return return_value;
+}
+int main(void)
+{
+    convert_to_BNB_memory(g_training_data_X, g_training_data_Y,
+                    g_test_data,
+                    TRAINING_DATA_LENGTH, INPUT_LENGTH,
+                    g_training_data_X_BNB, g_training_data_Y_BNB,
+                    g_test_data_BNB,
+                    INPUT_GROUPS_LENGTH, OUTPUT_GROUPS_LENGTH);
+    training_BNB(g_training_data_X_BNB, g_training_data_Y_BNB,
+                    TRAINING_DATA_LENGTH, INPUT_LENGTH,
+                    INPUT_GROUPS_LENGTH, OUTPUT_GROUPS_LENGTH,
+                    g_joints, g_dep_joints);
+    size_t answer = classify_BNB(g_test_data_BNB, INPUT_LENGTH,
+                    INPUT_GROUPS_LENGTH, OUTPUT_GROUPS_LENGTH,
+                    g_joints, g_dep_joints,
+                    g_partial_probability, g_probability);
+   
+    #ifdef DEBUG
+        printf("Result: %d\n", answer);
+    #endif
     return 0;
 }
