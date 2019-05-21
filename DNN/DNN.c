@@ -8,9 +8,6 @@
 #include "../common/common.h"
 #include "../common/l_alg.h"
 
-#define MDIM 4
-
-
 #define MAX_ITERATIONS 40
 
 element_t g_weights[INPUT_LENGTH];
