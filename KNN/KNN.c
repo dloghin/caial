@@ -26,11 +26,11 @@ element_t euclidian_distance_square (element_t X[], element_t Y[], size_t length
 * for the bumber of neighbors. It also calculate de distances to this neighbors with
 * their values
 */
-element_t classifyAPoint(element_t training_data_X[][], element_t training_data_Y[],
+element_t classifyAPoint(element_t training_data_X[TRAINING_DATA_LENGTH][INPUT_LENGTH], element_t training_data_Y[],
 												 size_t training_data_length, size_t input_length,
 												 element_t test_data_X[], size_t k, element_t distances[],
 												 element_t values[]) {
-	size_t index, jidenx, kindex;
+	size_t index, jindex, kindex;
 	element_t distance;
 	size_t max_frequency;
 	size_t return_value;
@@ -53,9 +53,9 @@ element_t classifyAPoint(element_t training_data_X[][], element_t training_data_
 		for(kindex = 0; kindex < k; kindex++) {
 			if(distance < distances[kindex]) {
 				//move all other points on position to the right
-				for(jindex = k - 1; jindex > kindex; jidnex--) {
-					distances[jidnex] = distances[jidnex-1];
-					values[jidnex] = values[jidnex-1];
+				for(jindex = k - 1; jindex > kindex; jindex--) {
+					distances[jindex] = distances[jindex-1];
+					values[jindex] = values[jindex-1];
 				}
 				//put the point on its position
 				distances[kindex] = distance;
@@ -74,8 +74,8 @@ element_t classifyAPoint(element_t training_data_X[][], element_t training_data_
 		going from kindex+1 because if the value was before the current
 		point than was already counted
 		*/
-		for(jidnex = kindex + 1; jindex < k; jidnex++) {
-			if(values[kindex] == values[jidnex]) {
+		for(jindex = kindex + 1; jindex < k; jindex++) {
+			if(values[kindex] == values[jindex]) {
 				current_frequency = current_frequency + 1;
 			}
 		}
