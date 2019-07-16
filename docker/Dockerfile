@@ -56,7 +56,7 @@ RUN cd riscv \
 ENV PATH ${PATH}:${RISCV}/bin
 ENV ROCKETCHIP /riscv/rocket-chip
 RUN cd riscv \
-	&& git clone --recursive  https://github.com/ucb-bar/rocket-chip.git
+	&& git clone --recursive  https://github.com/sdcioc/rocket-chip
 RUN cd riscv \
 	&& cd rocket-chip \
 	&& cd emulator \

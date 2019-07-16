@@ -66,7 +66,7 @@ cd
 
 * rocket chip
 ```
-git clone --recursive  https://github.com/ucb-bar/rocket-chip.git
+git clone --recursive  https://github.com/sdcioc/rocket-chip
 cd rocket-chip
 export ROCKETCHIP=`pwd`
 echo "export ROCKETCHIP="$ROCKETCHIP >> .bashrc
@@ -238,64 +238,3 @@ This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICE
 ## Acknowledgments
 
 * NUS
-
-
-
-prezentare 08.05.2019
-1.Cuprins:
-Machine learning algorithm
-Bprof
-Fpga
-2. MLA
-Status: KNN,DNN,LR,SVM,CT
-TODO:
-K-means to implement
-MM to implement
-3. Brof
-Status:
-Documentation completed
-    Ubuntu tutorial 1H
-    Dockerfile 3H
-    Docker Image 15min
-Bilateral counting - not the best pssible
-Function call counting, but not from where
-TODO:
-A new way of counting.
-New more inteligent parser (current one is very brute force)
-Maybe trasnfer some part of the code to awk
-Trying to get te same logs from another chip
-4. FPGA
-status:
-Rocket-Chip on Arty-7 with a program.
-TODO:
-Rocket-Chip our type of PMU implemented in scala
-Ariane chip on Arty-7
-Uploading programing via JTAG to chip
-Implement special instruction for the PMU to get its data
-Make Documentation
-
-
-Freeze here. Bprof 
-REport organizsez simple organaziare
-
-
-Objectives
-
-
-flaoritng point
-matrix manipulation
-Time taking varing the size of the matrix
-and having different floarting point units
-
-Verilator 
-power, timing on vivado
-
-Rosnet
-Alexnet
-
-convolution
-maxpool
-rel u
-
-accuracy for every ML algorithms
-
