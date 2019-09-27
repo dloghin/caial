@@ -114,26 +114,32 @@ python parser.py  strip_simv.log output
 
 If you want to test one of the algorithms you have to do the next things:
 Compile the algorithm
+
 ```
 make APP=NAME_OF_THE_ALGORITHM
 
 ```
+
 Simulate the algorithm
+
 ```
 make simv APP=NAME_OF_THE_ALGORITHM
 
 ```
+
 Delete the logs that are not necesary
+
 ```
 make strip APP=NAME_OF_THE_ALGORITHM
 
 ```
+
 Run the parser
+
 ```
 python parser.py  strip_simv.log output
 
 ```
-
 
 ### Adding other programs
 
@@ -159,6 +165,54 @@ The results will be in the file with the name of the second argument to the pars
 ```
 python parser.py  strip_simv.log output
 cat output.csv
+```
+
+## Debug with Rocket Chip Emulator and GDB
+
+Let's take MM as an eaxmple. To see the symbols, compile with `-g` flag (add it to CFLAGS in Makefile.inc). For this debugging activity, I recommend using four terminals, as follows:
+
+  1> caial repository, for building the code
+
+```
+cd caial
+make APP=MM
+```
+
+  2> emulator - Rocket Chip Emulator with DefaultConfigRBB config
+
+```
+cd rocket-chip/emulator
+CONFIG=DefaultConfigRBB make
+./emulator-freechips.rocketchip.system-DefaultConfigRBB +jtag_rbb_enable=1 -c -r 55555 ../../caial/MM.riscv
+```
+
+  3> opencda (with a specific config)
+
+```
+cd riscv-tools/bin
+./openocd -f cemulator.cfg
+```
+
+wait for it to show something like:
+
+```
+...
+Info : Listening on port 3333 for gdb connections
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+```
+
+  4> gdb
+
+```
+cd riscv-tools/bin
+./riscv64-unknown-elf-gdb ../../caial/MM.riscv
+...
+(gdb) set remotetimeout 5000
+(gdb) target remote localhost:3333
+(gdb) load
+(gdb) cont
+(gdb) x/9tx AA
 ```
 
 ## Docker Deployment
