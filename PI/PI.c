@@ -3,6 +3,9 @@
 // Language: C
 // Author: Jose Cintra (jose.cintra@html-apps.info)
 
+#define WITH_POSIT
+// #define WITH_SQRT
+
 #ifdef PFDEBUG
 #include <stdio.h>
 #endif
@@ -13,12 +16,12 @@
 
 #include<stdint.h>
 
-typedef double element_t;
+typedef float element_t;
 
 // variables
 element_t pi = 0.0;
 element_t sign = 1.0;
-int i;
+element_t i;
 
 // constants
 element_t one = 1.0;
@@ -27,11 +30,19 @@ element_t three = 3.0;
 element_t four = 4.0;
 
 #ifdef WITH_POSIT
+/*
+// posit(32,2)
 uint32_t posit_zero = 0x00000000;
 uint32_t posit_one = 0x40000000;
 uint32_t posit_two = 0x48000000;
 uint32_t posit_three = 0x4c000000;
 uint32_t posit_four = 0x50000000;
+*/
+uint32_t posit_zero = 0x00000000;
+uint32_t posit_one = 0x40000000;
+uint32_t posit_two = 0x44000000;
+uint32_t posit_three = 0x46000000;
+uint32_t posit_four = 0x48000000;
 
 void posit_init() {
   *((uint32_t*)&pi) = posit_zero;
@@ -45,19 +56,18 @@ void posit_init() {
 
 #ifdef WITH_SQRT
 void viete(int n) {
-   int j;         // Number of iterations and control variables
-   element_t f;   // factor that repeats
+   int k, j;
    pi = one;
           
-   for(i = n; i > 1; i--) {
-      f = two;
-      for(j = 1; j < i; j++){
-         f = two + sqrt(f);
+   for(k = n; k > 1; k--) {
+      i = two;
+      for(j = 1; j < k; j++){
+         i = two + sqrt(i);
       }
-      f = sqrt(f);
-      pi = pi * f / two;
+      i = sqrt(i);
+      pi = pi * i / two;
    }
-   pi *= sqrt(two) / two;
+   pi = pi * sqrt(two) / two;
    pi = two / pi;
 
 #ifdef PFDEBUG   
@@ -78,10 +88,18 @@ void leibniz(int n) {
 }
 
 void nilakantha(int n) {
+#ifdef WITH_POSIT
+  *((uint32_t*)&pi) = posit_three;
+  *((uint32_t*)&i) = posit_two;
+#else
   pi = three;
-  for(i = 2; i <= n*2; i += 2){
-     pi = pi + sign * (four / (i * (i + 1) * (i + 2)));
+  i = two;
+#endif
+  int j;
+  for(j = 2; j <= n*2; j += 2){
+     pi = pi + sign * (four / (i * (i + one) * (i + two)));
      sign = -sign;
+     i = i + two;
   }
 #ifdef PFDEBUG
   printf("\nAproximated value of PI = %1.16lf\n", pi);  
