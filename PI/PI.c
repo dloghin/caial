@@ -3,7 +3,7 @@
 // Language: C
 // Author: Jose Cintra (jose.cintra@html-apps.info)
 
-#define WITH_POSIT
+// #define WITH_POSIT
 // #define WITH_SQRT
 
 #ifdef PFDEBUG
@@ -21,7 +21,7 @@ typedef float element_t;
 // variables
 element_t pi = 0.0;
 element_t sign = 1.0;
-element_t i;
+element_t i = 1.0;
 
 // constants
 element_t one = 1.0;
@@ -38,21 +38,37 @@ uint32_t posit_two = 0x48000000;
 uint32_t posit_three = 0x4c000000;
 uint32_t posit_four = 0x50000000;
 */
+// posit(32,3)
 uint32_t posit_zero = 0x00000000;
 uint32_t posit_one = 0x40000000;
 uint32_t posit_two = 0x44000000;
 uint32_t posit_three = 0x46000000;
 uint32_t posit_four = 0x48000000;
+#else
+uint32_t fp32_zero = 0x00000000;
+uint32_t fp32_one = 0x3f800000;
+uint32_t fp32_two = 0x40000000;
+uint32_t fp32_three = 0x40400000;
+uint32_t fp32_four = 0x40800000;
+#endif /* WITH_POSIT */
 
-void posit_init() {
+void init() {
+#ifdef WITH_POSIT
   *((uint32_t*)&pi) = posit_zero;
   *((uint32_t*)&one) = posit_one;
   *((uint32_t*)&two) = posit_two;
   *((uint32_t*)&three) = posit_three;
   *((uint32_t*)&four) = posit_four;
   *((uint32_t*)&sign) = posit_one;
-}
+#else
+  *((uint32_t*)&pi) = fp32_zero;
+  *((uint32_t*)&one) = fp32_one;
+  *((uint32_t*)&two) = fp32_two;
+  *((uint32_t*)&three) = fp32_three;
+  *((uint32_t*)&four) = fp32_four;
+  *((uint32_t*)&sign) = fp32_one;
 #endif /* WITH_POSIT */
+}
 
 #ifdef WITH_SQRT
 void viete(int n) {
@@ -92,8 +108,8 @@ void nilakantha(int n) {
   *((uint32_t*)&pi) = posit_three;
   *((uint32_t*)&i) = posit_two;
 #else
-  pi = three;
-  i = two;
+  *((uint32_t*)&pi) = fp32_three;
+  *((uint32_t*)&i) = fp32_two;
 #endif
   int j;
   for(j = 2; j <= n*2; j += 2){
@@ -107,9 +123,7 @@ void nilakantha(int n) {
 }
 
 int main() {
-#ifdef WITH_POSIT
-  posit_init();
-#endif
+  init();
 // leibniz(100000000);
 // viete(100);
   nilakantha(200);
